@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.1.2
+FROM rocker/r-ver:4.2.1
 
 # DeGAUSS container metadata
 ENV degauss_name="geocoder"
@@ -51,6 +51,14 @@ RUN R --quiet -e "remotes::install_github('rstudio/renv@0.15.4')"
 
 COPY renv.lock .
 RUN R --quiet -e "renv::restore()"
+
+RUN R -e "renv::install('degauss-org/dht')"
+RUN apt update && apt install -y libsecret-1-0
+RUN R -e "renv::install('Rcpp')"
+RUN R -e "renv::install('GIScience/openrouteservice-r')"
+RUN R -e "renv::install('sf')"
+RUN apt install -y  libudunits2-dev libproj-dev libgdal-dev libgeos-dev
+
 
 COPY geocode.rb .
 COPY entrypoint.R .
