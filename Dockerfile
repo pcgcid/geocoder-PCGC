@@ -28,7 +28,14 @@ RUN apt-get update && apt-get install -y \
     bison \
     gnupg \
     software-properties-common \
+    libsodium-dev \
+    libpng-dev \
+    gdal-bin libgdal-dev \
+    libudunits2-dev \
+    libv8-dev\
     && apt-get clean
+
+
 
 RUN gem install sqlite3 json Text
 
@@ -63,6 +70,11 @@ RUN apt install -y  libudunits2-dev libproj-dev libgdal-dev libgeos-dev
 COPY geocode.rb .
 COPY entrypoint.R .
 
+
+COPY ./ctsa_centers.csv /app
+COPY ./isochrones.rds /app
+
 WORKDIR /tmp
 
 ENTRYPOINT ["/app/entrypoint.R"]
+#CMD ["/bin/bash"]
