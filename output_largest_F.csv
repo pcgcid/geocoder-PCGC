@@ -1,0 +1,52 @@
+"","ID","address","matched_street","matched_zip","matched_city","matched_state","lat","lon","score","precision","geocode_result","nearest_center","distance"
+"1",1,"93 NORTH 9TH STREET BROOKLYN NY 11211","N 9th St","11211","Brooklyn","NY",40.718941,-73.956535,0.689,"street","geocoded","NewYork10016",15
+"2",23,"146 EAST FIRST AVE WILLIAMSON WV 25661","E 1st Ave","25661","East Williamson","WV",37.671079,-82.278081,0.704,"street","geocoded","Lexington40526",180
+"3",17,"101 CHESAPEAKE BLVD ELKTON MD 21921","Chesapeake Blvd","21921","Elkton","MD",39.6045,-75.786853,0.831,"street","geocoded","Baltimore21218",75
+"4",31,"2276 WILTON DR WILTON MANORS FL 33305","Wilton Dr","33305","Jenada Isles","FL",26.156905,-80.137562,0.745,"range","geocoded","CoralGables33146",60
+"5",16,"337 BRIGHTSEAT ROAD LANDOVER MD 20785","Brightseat Rd","20785","Landover","MD",38.893451,-76.851007,0.813,"range","geocoded","Washington20010",30
+"6",48,"3555 SOUTHERN HILLS DR SIOUX CITY IA 51106","Southern Hills Dr","51106","Sioux City","IA",42.449247,-96.353116,0.815,"range","geocoded","KansasCity66160",300
+"7",40,"105 Amity Way Wayne PA 19087","Amity Dr","19087","Wayne","PA",40.076428,-75.454634,0.837,"range","geocoded","Philadelphia19104",45
+"8",45,"2900 4TH AVE BILLINGS MT 59101","4th Ave S","59101","Billings","MT",45.77639,-108.501942,0.837,"range","geocoded","Aurora80045",600
+"9",9,"7242 ROUTE 9 PLATTSBURGH NY 12901","Rte 9","12901","Plattsburgh","NY",44.734768,-73.429329,0.878,"range","geocoded","Boston02111",300
+"10",10,"520 5TH AVE MCKEESPORT PA 15132","5th Ave","15132","McKeesport","PA",40.35118,-79.861879,0.889,"range","geocoded","Pittsburgh15213",30
+"11",35,"931 OLD SMITHVILLE HWY MCMINNVILLE TN 37110","Old Smithville Rd","37110","McMinnville","TN",35.701452,-85.788227,0.889,"range","geocoded","Nashville37232",105
+"12",29,"732 W 2ND ST TIFTON GA 31794","W 2nd St","31794","Tifton","GA",31.457686,-83.522257,0.894,"range","geocoded","Gainesville32611",150
+"13",11,"122 W 3RD STREET GREENSBURG PA 15601","W 3rd St","15601","Southwest Greensburg","PA",40.299749,-79.545902,0.902,"range","geocoded","Pittsburgh15213",60
+"14",14,"41 N 4TH ST ALLENTOWN PA 18102","N 4th St","18102","Allentown","PA",40.604715,-75.465711,0.902,"range","geocoded","Philadelphia19104",90
+"15",51,"415 VALLEY VIEW DR SCOTTSBLUFF NE 69361","Valley View Dr","69361","Scottsbluff","NE",41.878943,-103.656549,0.902,"range","geocoded","Aurora80045",225
+"16",49,"300 E 3RD ST NORTH PLATTE NE 69101","E 3rd St","69101","North Platte","NE",41.135235,-100.761028,0.907,"range","geocoded","Aurora80045",300
+"17",41,"305 W 45th St New York NY 10036","W 45th St","10036","New York","NY",40.759333,-73.988542,0.908,"range","geocoded","NewYork10016",15
+"18",13,"240 W 3RD ST WILLIAMSPORT PA 17701","W 3rd St","17701","South Williamsport","PA",41.239267,-77.004838,0.911,"range","geocoded","Hershey17033",150
+"19",22,"50 MCDOWELL STREET WELCH WV 24801","McDowell St","24801","Welch","WV",37.433002,-81.58558,0.926,"range","geocoded","WinstonSalem27157",195
+"20",21,"116 N JEFFERSON STREET ROANOKE VA 24016","N Jefferson St","24016","Roanoke","VA",37.27439,-79.940559,0.929,"range","geocoded","Charlottesville22904",135
+"21",46,"158 N SCOTT STREET JOLIET IL 60432","N Scott St","60432","Joliet","IL",41.527017,-88.080098,0.93,"range","geocoded","Chicago60612",60
+"22",42,"11839 Federalist Way Fairfax VA 22030","Federalist Way","22030","Fairfax","VA",38.850551,-77.354085,0.933,"range","geocoded","Washington20010",45
+"23",8,"1 CLINTON AVE ALBANY NY 12207","Clinton Ave","12207","Albany","NY",42.653821,-73.748853,0.935,"range","geocoded","Worcester01655",150
+"24",44,"101 West End Avenue New York NY 10023","W End Ave","10023","New York","NY",40.774735,-73.988177,0.935,"range","geocoded","NewYork10016",15
+"25",47,"1207 NETWORK CENTRE DR EFFINGHAM IL 62401","Network Centre Dr","62401","Effingham","IL",39.145834,-88.52464,0.935,"range","geocoded","SaintLouis63130",120
+"26",28,"115 ENTERPRISE COURT GREENWOOD SC 29649","Enterprise Ct","29649","Greenwood","SC",34.21778,-82.165508,0.936,"range","geocoded","Atlanta30322",195
+"27",38,"500 NORTH A STREET RICHMOND IN 47374","N A St","47374","Richmond","IN",39.830626,-84.89517,0.936,"range","geocoded","Bloomington46202",90
+"28",39,"317 SOUTH DRAKE ROAD KALAMAZOO MI 49009","S Drake Rd","49009","Kalamazoo","MI",42.289981,-85.648135,0.936,"range","geocoded","AnnArbor48109",120
+"29",37,"602 SOUTH MICHIGAN ST SOUTH BEND IN 46601","S Michigan St","46601","South Bend","IN",41.669601,-86.250146,0.937,"range","geocoded","Chicago60611",120
+"30",25,"1013 SPRING LANE SANFORD NC 27330","Spring Ln","27330","Sanford","NC",35.487477,-79.199239,0.938,"range","geocoded","ChapelHill27599",60
+"31",27,"1420 MCCARTHY BLVD NEW BERN NC 28562","McCarthy Blvd","28562","New Bern","NC",35.099366,-77.095044,0.938,"range","geocoded","ChapelHill27599",165
+"32",20,"1480 EAST MAIN STREET WYTHEVILLE VA 24382","E Main St","24382","Wytheville","VA",36.949377,-81.064837,0.939,"range","geocoded","WinstonSalem27157",105
+"33",15,"2221 W MARKET STREET POTTSVILLE PA 17901","W Market St","17901","Pottsville","PA",40.674703,-76.226402,0.94,"range","geocoded","Hershey17033",75
+"34",2,"380 WESTMINSTER ST PROVIDENCE RI 02903","Westminster St","02903","Providence","RI",41.821258,-71.414764,0.941,"range","geocoded","Worcester01655",60
+"35",19,"324 COMMERCE ROAD FARMVILLE VA 23901","Commerce Rd","23901","Farmville","VA",37.268844,-78.412779,0.941,"range","geocoded","Charlottesville22904",90
+"36",33,"108 CENTER POINTE DR CLARKSVILLE TN 37040","Center Pointe Dr","37040","Clarksville","TN",36.569538,-87.306637,0.941,"range","geocoded","Nashville37232",60
+"37",43,"400 Monroe St Hoboken NJ 07030","Monroe St","07030","Hoboken","NJ",40.742871,-74.038942,0.943,"range","geocoded","NewYork10016",30
+"38",3,"177 MAIN STREET LITTLETON NH 03561","Main St","03561","Littleton","NH",44.307496,-71.776655,0.944,"range","geocoded","Boston02111",180
+"39",5,"46 FRONT STREET WATERVILLE ME 04901","Front St","04901","Waterville","ME",44.55142,-69.628597,0.945,"range","geocoded","Boston02111",210
+"40",30,"97 WEST OAK AVE PANAMA CITY FL 32401","W Oak Ave","32401","Panama City","FL",30.155165,-85.662289,0.947,"range","geocoded","Gainesville32611",300
+"41",34,"1800 OLD TROY RD UNION CITY TN 38261","Old Troy Rd","38261","Union City","TN",36.416139,-89.078016,0.947,"range","geocoded","Nashville37232",195
+"42",12,"901 UNIVERSITY DR STATE COLLEGE PA 16801","University Dr","16801","State College","PA",40.797574,-77.845018,0.949,"range","geocoded","Hershey17033",150
+"43",24,"1925 E MAIN ST ALBEMARLE NC 28001","E Main St","28001","Albemarle","NC",35.348935,-80.164385,0.949,"range","geocoded","WinstonSalem27157",90
+"44",4,"202 HARLOW ST BANGOR ME 04401","Harlow St","04401","North Bangor","ME",44.804822,-68.773218,0.951,"range","geocoded","Boston02111",300
+"45",6,"22 SUSSEX ST HACKENSACK NJ 07601","Sussex St","07601","Hackensack","NJ",40.880117,-74.046927,0.951,"range","geocoded","NewYork10032",15
+"46",32,"203 SOUTH WALNUT ST FLORENCE AL 35630","S Walnut St","35630","North Florence","AL",34.80097,-87.671313,0.951,"range","geocoded","Birmingham35294",135
+"47",36,"1301 GREENE STREET MARIETTA OH 45750","Greene St","45750","West Marietta","OH",39.424655,-81.425403,0.956,"range","geocoded","Columbus43210",135
+"48",50,"115 N WEBB RD GRAND ISLAND NE 68803","N Webb Rd","68803","Grand Island","NE",40.917128,-98.378358,0.956,"range","geocoded","KansasCity66160",300
+"49",18,"2875 SABRE ST VIRGINIA BEACH VA 23452","Sabre St","23452","Virginia Beach","VA",36.822828,-76.068317,0.962,"range","geocoded","Richmond23298",120
+"50",26,"145 ROWAN STREET FAYETTEVILLE NC 28301","Rowan St","28301","East Fayetteville","NC",35.057681,-78.878307,0.965,"range","geocoded","ChapelHill27599",105
+"51",7,"75 OAK STREET PATCHOGUE NY 11772","Oak St","11772","East Patchogue","NY",40.768181,-73.011352,0.966,"range","geocoded","Bronx10461",90
