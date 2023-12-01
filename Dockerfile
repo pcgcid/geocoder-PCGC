@@ -33,8 +33,13 @@ RUN apt-get update && apt-get install -y \
     gdal-bin libgdal-dev \
     libudunits2-dev \
     libv8-dev\
+    libfontconfig1-dev \
+    libfreetype6-dev \
     && apt-get clean
 
+
+# Install necessary R packages
+#RUN R -e "install.packages(c('systemfonts', 'ggplot2'), dependencies=TRUE)"
 
 
 RUN gem install sqlite3 json Text
@@ -50,7 +55,6 @@ COPY /gemspec ./gemspec
 RUN make -f Makefile.ruby install \
     && gem install Geocoder-US-2.0.4.gem
 
-WORKDIR /app
 
 # install required version of renv
 RUN R --quiet -e "install.packages('remotes', repos = 'https://packagemanager.rstudio.com/all/__linux__/focal/latest')"
@@ -61,10 +65,12 @@ RUN R --quiet -e "renv::restore()"
 
 RUN R -e "renv::install('degauss-org/dht')"
 RUN apt update && apt install -y libsecret-1-0
+
 RUN R -e "renv::install('Rcpp')"
 RUN R -e "renv::install('GIScience/openrouteservice-r')"
 RUN R -e "renv::install('sf')"
 RUN apt install -y  libudunits2-dev libproj-dev libgdal-dev libgeos-dev
+RUN R -e 'install.packages(c("shiny", "shinydashboard", "docopt", "sf"), repos="https://cran.rstudio.com/")'
 
 
 COPY geocode.rb .
@@ -73,8 +79,18 @@ COPY entrypoint.R .
 
 COPY ./ctsa_centers.csv /app
 COPY ./isochrones.rds /app
+COPY ./app.R /app
+
 
 WORKDIR /tmp
 
+
 ENTRYPOINT ["/app/entrypoint.R"]
+
+
+
+#CMD ["R", "-e", "shiny::runApp('/app',host='0.0.0.0',port = 3838)"]
+
+# Expose port 3838
+EXPOSE 3838
 #CMD ["/bin/bash"]

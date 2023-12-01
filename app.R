@@ -15,21 +15,19 @@ library(leaflet.extras)
 #                                   iconColor = "black", library = "glyphicon",
 #                                   squareMarker =  TRUE)
 icon.center <- makeAwesomeIcon(icon = "medkit", markerColor = "blue", library = "ion")
-
 icon.center_clicked <- makeAwesomeIcon(icon = "medkit", markerColor = "red", library = "ion")
 icon.nearest_center <- makeAwesomeIcon(icon = "medkit", markerColor = "orange", library = "ion")
-
-
 icon.ion <- makeAwesomeIcon(icon = "home", markerColor = "green",
                             library = "ion")
 
 
 # Load data from CSV files
-drive_time_output <- read.csv("output_largest_F.csv")
-ctsa_centers <- read.csv("ctsa_centers.csv")
+drive_time_output <- read.csv("/app/output.csv")
+ctsa_centers <- read.csv("/app/ctsa_centers.csv")
 
 # Define UI
 ui <- fluidPage(
+  fileInput("file","Upload the file"),
   selectInput("selected_address", "Select Address", choices = drive_time_output$address),
   textInput(inputId = 'new_address', label = 'Address Input', placeholder = "Enter time the address"),
   
@@ -85,9 +83,9 @@ server <- function(input, output, session) {
           lng = selected_coordinates()$lon,
           label = paste("Patient address"), 
           icon = icon.ion, group = "awesome_markers"
-          #, options = markerOptions(icon = makeIcon(iconUrl = "http://leafletjs.com/examples/custom-icons/leaf-red.png"))
         )  
       
+      session$userData$prev_add <- input$selected_address 
       
       route_data <- data.frame(
         lat = c(selected_coordinates()$lat, selected_center_info_data$lat),
@@ -118,7 +116,8 @@ server <- function(input, output, session) {
     updateSelectInput(session, "selected_center", selected = ctsa_centers$abbreviation[ctsa_centers$abbreviation == marker_id])
     
     # Remove the previously clicked marker (if any) and add a new one with blue color for the previously clicked marker
-    if (!is.null(session$userData$prev_marker_id) && session$userData$prev_marker_id != marker_id && session$userData$prev_marker_id!= session$userData$nearest_center) {
+    if ((!is.null(session$userData$prev_marker_id) && session$userData$prev_marker_id != marker_id && 
+        session$userData$prev_marker_id!= session$userData$nearest_center) || (session$userData$prev_add != input$selected_address)) {
       leafletProxy("map") %>%
         #clearGroup(group = "previous_center") %>%
         addAwesomeMarkers(

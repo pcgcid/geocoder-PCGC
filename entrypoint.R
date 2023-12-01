@@ -223,10 +223,19 @@ rdcrn_geocode <- function(filename, score_threshold = 0.5, out_filename) {
 
 doc <- "
       Usage:
-      entrypoint.R <filename> <out_filename> [<score_threshold>]
+        entrypoint.R <filename> <out_filename> [<score_threshold>] [--shiny] 
+        entrypoint.R (-h | --help)
+         
+      Options:
+        -h --help     Show this screen.
+        --shiny       Start shiny server on port 3838.
       "
 opt <- docopt::docopt(doc)
 if (is.null(opt$score_threshold)) opt$score_threshold <- 0.5
+
+if (opt$shiny) {
+  shiny::runApp(appDir="/app",host='0.0.0.0',port=3838)
+}
 
 d <- readr::read_csv(opt$filename, show_col_types = FALSE)
 
