@@ -1,5 +1,6 @@
 # Install required packages if not already installed
 # install.packages(c("shiny", "leaflet", "dplyr", "sf", "tidygraph", "ggraph"))
+source("utils.R")
 
 # Load required libraries
 library(shiny)
@@ -9,6 +10,9 @@ library(sf)
 library(tidygraph)
 library(ggraph)
 library(leaflet.extras)
+library(reactlog)
+reactlog()
+
 
 
 # icon.glyphicon <- makeAwesomeIcon(icon = "flag", markerColor = "blue",
@@ -22,14 +26,17 @@ icon.ion <- makeAwesomeIcon(icon = "home", markerColor = "green",
 
 
 # Load data from CSV files
-drive_time_output <- read.csv("/app/output.csv")
-ctsa_centers <- read.csv("/app/ctsa_centers.csv")
+# if (file.exists("/app/output.csv")){
+#   drive_time_output <- read.csv("/app/output.csv")}
+ctsa_centers <- read.csv("./ctsa_centers.csv")
 
 # Define UI
 ui <- fluidPage(
   fileInput("file","Upload the file"),
-  selectInput("selected_address", "Select Address", choices = drive_time_output$address),
-  textInput(inputId = 'new_address', label = 'Address Input', placeholder = "Enter time the address"),
+  selectInput("ID", "Select Participant ID", choices = ""),
+  textInput(inputId = 'new_address', label = 'Address Input', placeholder = "Enter the address"),
+  textInput(inputId = 'out_filename', label = 'Output File Name', placeholder = "Enter output file name", value = "./output.csv"),
+  numericInput("score_threshold", "Enter score threshold", value = 0.5),
   
   numericInput("new_lat", "Enter Latitude", value = NA),
   numericInput("new_lon", "Enter Longitude", value = NA),
@@ -38,13 +45,50 @@ ui <- fluidPage(
   tableOutput("info_table")
 )
 
+
+#drive_time_output <- reactiveVal(NULL)
+
+
 # Define server logic
 server <- function(input, output, session) {
+  
+drive_time_output <- reactive({
+    req(input$file)
+    filename = input$file$datapath
+    out_filename = input$out_filename
+    score_threshold = input$score_threshold
+
+    drive_time_result = rdcrn_run(list(filename = filename, out_filename = out_filename, score_threshold = score_threshold))
+
+    if (!is.null(drive_time_result) && nrow(drive_time_result) > 0){
+      drive_time_result = drive_time_result %>% 
+        dplyr::rename_with(., stringr::str_to_lower) %>%
+        dplyr::mutate(id = as.character(id))}
+
+    return(drive_time_result)
+})
+  
+  
+
+  
+  observe({
+    req(drive_time_output())
+    updateSelectInput(session, "ID", choices = drive_time_output()$id)
+  })
+
+  
+  # Observe block to update output whenever the file is uploaded
+
+  
+  
+  
   # Combine selected address from the drop-down and manually entered coordinates
   selected_coordinates <- reactive({
-    if (!is.null(input$selected_address)) {
-      selected_data <- drive_time_output %>%
-        filter(address == input$selected_address)
+    req(drive_time_output())
+
+    if (!is.null(input$ID) && input$ID %in% drive_time_output()$id) {
+      selected_data <- drive_time_output() %>%
+        filter(id == input$ID)
       return(list(lat = selected_data$lat, lon = selected_data$lon,nearest_center = selected_data$nearest_center))
     } else if (!is.na(input$new_lat) && !is.na(input$new_lon)) {
       return(list(lat = input$new_lat, lon = input$new_lon))
@@ -85,7 +129,7 @@ server <- function(input, output, session) {
           icon = icon.ion, group = "awesome_markers"
         )  
       
-      session$userData$prev_add <- input$selected_address 
+      session$userData$prev_ID <- input$ID
       
       route_data <- data.frame(
         lat = c(selected_coordinates()$lat, selected_center_info_data$lat),
@@ -116,8 +160,8 @@ server <- function(input, output, session) {
     updateSelectInput(session, "selected_center", selected = ctsa_centers$abbreviation[ctsa_centers$abbreviation == marker_id])
     
     # Remove the previously clicked marker (if any) and add a new one with blue color for the previously clicked marker
-    if ((!is.null(session$userData$prev_marker_id) && session$userData$prev_marker_id != marker_id && 
-        session$userData$prev_marker_id!= session$userData$nearest_center) || (session$userData$prev_add != input$selected_address)) {
+    if ((!is.null(session$userData$prev_marker_id) && session$userData$prev_marker_id != marker_id &&
+        session$userData$prev_marker_id!= session$userData$nearest_center) || (session$userData$prev_ID != input$ID)) {
       leafletProxy("map") %>%
         #clearGroup(group = "previous_center") %>%
         addAwesomeMarkers(
@@ -130,6 +174,9 @@ server <- function(input, output, session) {
           group = "previous_center"
         )
     }
+
+    
+
     
     if(!is.null(session$userData$prev_marker_id) && session$userData$prev_marker_id == session$userData$nearest_center){
       leafletProxy("map") %>%
@@ -150,44 +197,50 @@ server <- function(input, output, session) {
     
     
     # Store the current marker ID as the previously clicked marker
-    session$userData$prev_marker_id <- marker_id    
+# Store the current marker ID as the previously clicked marker
+session$userData$prev_marker_id <- marker_id
+
+# Update the nearest center to the clicked marker
+session$userData$nearest_center <- input$selected_center
   })  
   
   
   # Initialize the default selected center based on the nearest center
-  observe({
-    if (!is.null(input$selected_address)) {
-      nearest_center <- drive_time_output %>%
-        filter(address == input$selected_address) %>%
+  observeEvent(input$ID,{
+    if (!is.null(input$ID)) {
+      nearest_center <- drive_time_output() %>%
+        filter(id == input$ID) %>%
         pull(nearest_center)
-      
+
       if (!is.null(nearest_center)) {
-        updateSelectInput(session, "selected_center", selected = nearest_center)  
-        
+        updateSelectInput(session, "selected_center", selected = nearest_center)
+
         leafletProxy("map") %>%
           clearGroup(group = "nearest_center") %>%
-          addAwesomeMarkers(ctsa_centers$lon[ctsa_centers$abbreviation == nearest_center], ctsa_centers$lat[ctsa_centers$abbreviation == nearest_center], 
-                            popup = ctsa_centers$abbreviation[ctsa_centers$abbreviation == nearest_center], label = ctsa_centers$abbreviation[ctsa_centers$abbreviation == nearest_center], 
+          addAwesomeMarkers(ctsa_centers$lon[ctsa_centers$abbreviation == nearest_center], ctsa_centers$lat[ctsa_centers$abbreviation == nearest_center],
+                            popup = ctsa_centers$abbreviation[ctsa_centers$abbreviation == nearest_center], label = ctsa_centers$abbreviation[ctsa_centers$abbreviation == nearest_center],
                             icon = icon.nearest_center, layerId = ctsa_centers$abbreviation[ctsa_centers$abbreviation == nearest_center], group = "nearest_center")
-        
-        
-        session$userData$nearest_center <- nearest_center 
+
+
+        session$userData$nearest_center <- nearest_center
       }
     }
-  })  
+  })
   
-  # Render table with information
+
+
   output$info_table <- renderTable({
     if (!is.null(selected_coordinates()$lat) && !is.null(selected_coordinates()$lon)) {
-      drive_time_output %>%
-        filter(lat == selected_coordinates()$lat & lon == selected_coordinates()$lon)
-    } else if (!is.null(input$selected_address)) {
-      drive_time_output %>%
-        filter(address == input$selected_address)
+      drive_time_output() %>%
+        filter(lat == selected_coordinates()$lat & lon == selected_coordinates()$lon) 
+    } else if (!is.null(input$ID)) {
+      drive_time_output() %>%
+        filter(id == input$ID)
     } else {
       data.frame()
     }
   })
+  
 }
 
 # Run the application
