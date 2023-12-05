@@ -75,11 +75,14 @@ RUN R -e 'install.packages(c("shiny", "shinydashboard", "docopt", "sf"), repos="
 
 COPY geocode.rb .
 COPY entrypoint.R .
+COPY utils.R .
 
 
 COPY ./ctsa_centers.csv /app
 COPY ./isochrones.rds /app
 COPY ./app.R /app
+
+
 
 
 WORKDIR /tmp
