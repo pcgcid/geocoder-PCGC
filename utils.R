@@ -1,3 +1,4 @@
+#!/usr/local/bin/Rscript
 # utils.R
 library(sf)
 library(purrr)
@@ -7,10 +8,11 @@ library(knitr)
 
 
 rdcrn_drivetime <- function(filename, out_filename) {
-  iso_filename <- Sys.getenv("ISO_FILENAME", "./isochrones.rds")
+  browser()
+  iso_filename <- Sys.getenv("ISO_FILENAME", "/app/isochrones.rds")
   
-  centers_filename <- Sys.getenv("CENTERS_FILENAME", './ctsa_centers.csv')
-  output_filename <- Sys.getenv("OUTPUT_FILENAME", "./output.csv")
+  centers_filename <- Sys.getenv("CENTERS_FILENAME", '/app/ctsa_centers.csv')
+  output_filename <- Sys.getenv("OUTPUT_FILENAME", "/app/output.csv")
   
   centers <- readr::read_csv(centers_filename) %>% arrange(abbreviation)
   
@@ -32,12 +34,17 @@ rdcrn_drivetime <- function(filename, out_filename) {
   
   #dx <- sapply(dx, FUN = function(x) x[1])
   
+  if (dim(as.matrix(dx))[2] == 1){
+    dx =t(as.matrix(dx))
+  }
   
   df <- as.data.frame(dx)
   # colnames(df)[apply(df,1,which.max)]
   
   mins <- apply(df, 1, which.min)
+  # Extract values using sapply
   distance <- sapply(1:nrow(df), function(i) as.numeric(df[i, mins[i]]))
+  
   not_found <- length(centers$abbreviation) + 1
   mins[is.na(mins == 0)] <- not_found
   min_centers <- centers$abbreviation[unlist(mins)]
@@ -57,6 +64,8 @@ rdcrn_drivetime <- function(filename, out_filename) {
 
 
 rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
+  #browser()
+  
   d <- readr::read_csv(filename, show_col_types = FALSE)
   # d <- readr::read_csv('test/my_address_file.csv')
   # d <- readr::read_csv('test/my_address_file_missing.csv')
@@ -113,8 +122,8 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
     d_for_geocoding$geocodes <- mappp::mappp(d_for_geocoding$address,
                                              geocode,
                                              parallel = TRUE,
-                                             cache = TRUE,
-                                             cache_name = "geocoding_cache"
+                                             # cache = TRUE,
+                                             # cache_name = "geocoding_cache"
     )
     
     ## extract results, if a tie then take first returned result
@@ -217,6 +226,8 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
 
 
 rdcrn_run <- function(opt){
+  # #browser()
+  
   if (is.null(opt$score_threshold)) opt$score_threshold <- 0.5
   d <- readr::read_csv(opt$filename, show_col_types = FALSE)
   
