@@ -11,7 +11,7 @@ library(tidygraph)
 library(ggraph)
 library(leaflet.extras)
 library(tibble)
-
+library(shinyjs)
 
 
 # icon.glyphicon <- makeAwesomeIcon(icon = "flag", markerColor = "blue",
@@ -40,7 +40,11 @@ ui <- fluidPage(
   numericInput("new_lat", "Enter Latitude", value = NA),
   numericInput("new_lon", "Enter Longitude", value = NA),
   selectInput("selected_center", "Select Center", choices = ctsa_centers$abbreviation,selected = NULL),
+  
+  actionButton("reset_button", "Reset Data"),
+  
   actionButton("submit_button", "Submit address or latitude & longtitude"),
+  
   
   leafletOutput("map"),
   tableOutput("info_table")
@@ -56,7 +60,20 @@ server <- function(input, output, session) {
   #drive_time_output <- reactiveVal(NULL)
   tempfile_path <- reactiveVal("/tmp/temp.csv")
 
+  
+  # Initialize the map
+  output$map <- renderLeaflet({
+    leaflet(data = ctsa_centers) %>%
+      addTiles() %>%
+      addAwesomeMarkers(~lon, ~lat, popup = ~abbreviation, label = ~abbreviation, 
+                        icon = icon.center, layerId = ~abbreviation
+      ) %>%
+      setView(lng = -95.7129, lat = 37.0902, zoom = 4)
+  })
+  
+  
   observeEvent(input$submit_button, {
+    reset("map")
     # Extract values from inputs
     address <- ifelse(!is.null(input$new_address), input$new_address, NA)
     lon <- ifelse(!is.null(input$new_lon), input$new_lon, NA)
@@ -68,6 +85,7 @@ server <- function(input, output, session) {
     else if (!is.na(lat) & !is.na(lon)){
       data <- tibble(ID = 1, address = NA, lon = lon, lat = lat)
     }
+    updateSelectInput(session, "ID", choices = drive_time_output()$id, selected = 1)
     write.csv(data,tempfile_path(),row.names = F)
 
   })
@@ -130,16 +148,6 @@ server <- function(input, output, session) {
   })
   
   
-  
-  # Initialize the map
-  output$map <- renderLeaflet({
-    leaflet(data = ctsa_centers) %>%
-      addTiles() %>%
-      addAwesomeMarkers(~lon, ~lat, popup = ~abbreviation, label = ~abbreviation, 
-                        icon = icon.center, layerId = ~abbreviation
-      ) %>%
-      setView(lng = -95.7129, lat = 37.0902, zoom = 4)
-  })
   
   # Observe changes in the selected center and update the map
   observe({
