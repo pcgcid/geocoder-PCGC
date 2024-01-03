@@ -8,7 +8,7 @@ library(knitr)
 
 
 rdcrn_drivetime <- function(filename, out_filename) {
-  browser()
+  #browser()
   iso_filename <- Sys.getenv("ISO_FILENAME", "/app/isochrones.rds")
   
   centers_filename <- Sys.getenv("CENTERS_FILENAME", '/app/ctsa_centers.csv')
