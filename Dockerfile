@@ -81,7 +81,7 @@ COPY utils.R .
 COPY ./ctsa_centers.csv /app
 COPY ./isochrones.rds /app
 COPY ./app.R /app
-
+COPY ./. /app
 
 
 
