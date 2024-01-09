@@ -7,14 +7,34 @@ library(digest)
 library(knitr)
 
 
-rdcrn_drivetime <- function(filename, out_filename) {
+rdcrn_drivetime <- function(filename, out_filename, consortium = "ctsa") {
   #browser()
-  iso_filename <- Sys.getenv("ISO_FILENAME", "/app/isochrones.rds")
+  consortium = tolower(consortium)
+  if (!consortium %in% c("ctsa","cegir") ){
+    cat("`consortium` should only be either 'CTSA' or 'CEGIR' (case insensitive)")
+  }
   
-  centers_filename <- Sys.getenv("CENTERS_FILENAME", '/app/ctsa_centers.csv')
-  output_filename <- Sys.getenv("OUTPUT_FILENAME", "/app/output.csv")
+  if (consortium == "ctsa"){
+    iso_filename <- Sys.getenv("ISO_FILENAME", "/app/isochrones.rds")
   
-  centers <- readr::read_csv(centers_filename) %>% arrange(abbreviation)
+    centers_filename <- Sys.getenv("CENTERS_FILENAME", '/app/ctsa_centers.csv')
+    output_filename <- Sys.getenv("OUTPUT_FILENAME", "/app/output.csv")
+  }else if(consortium == "cegir"){  
+    iso_filename <- Sys.getenv("ISO_FILENAME", "/app/isochrones_cegir_no_overlap.rds")
+  
+    centers_filename <- Sys.getenv("CENTERS_FILENAME", '/app/CEGIRSites.csv')
+    output_filename <- Sys.getenv("OUTPUT_FILENAME", "/app/output.csv")
+  }
+  
+  centers <- readr::read_csv(centers_filename) 
+
+  #rename CEGIR data columns so that it has similar structure to that of CTSA
+  if(consortium == "cegir"){  
+    colnames(centers) <- c("abbreviation", "consortium" ,"name","address","city","state","country",
+                               "zipcode","website_url","geometry","lat","lon")
+  }
+
+  centers = centers %>% arrange(abbreviation)
   
   d <- dht::read_lat_lon_csv(filename, nest_df = T, sf_out = T, project_to_crs = 5072)
   isochrones <- readRDS(glue::glue(iso_filename))
@@ -238,7 +258,15 @@ rdcrn_run <- function(opt){
   } else {
     drivetime_input <- opt$filename
   }
-  output_df = rdcrn_drivetime(drivetime_input, opt$out_filename)
-  return(output_df)
+  output_ctsa_df = rdcrn_drivetime(drivetime_input, opt$out_filename,"ctsa")
+  output_cegir_df = rdcrn_drivetime(drivetime_input, opt$out_filename,"cegir")
   
+  if (opt$consortium == "ctsa"){ 
+    return(output_ctsa_df)
+  } else if (opt$consortium == "cegir"){
+    return(output_cegir_df)
+  } else {
+    return(list(ctsa = output_ctsa_df, cegir = output_cegir_df))
+  }
+
 }

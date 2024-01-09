@@ -11,7 +11,7 @@ withr::with_message_sink("/dev/null", library(knitr))
 
 doc <- "
       Usage:
-        entrypoint.R [<filename>] [<out_filename>] [<score_threshold>] [--shiny] 
+        entrypoint.R [<filename>] [<out_filename>] [<score_threshold>] [<consortium>] [--shiny] 
         entrypoint.R (-h | --help)
          
       Options:
