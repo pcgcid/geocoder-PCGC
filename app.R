@@ -29,6 +29,8 @@ icon.ion <- makeAwesomeIcon(icon = "home", markerColor = "green",
 #   drive_time_output <- read.csv("./output.csv")}
 ctsa_centers <- read.csv("/app/ctsa_centers.csv")
 cegir_centers <- read.csv("/app/CEGIRSites.csv")
+colnames(cegir_centers) <- c("abbreviation", "consortium" ,"name","address","city","state","country",
+                             "zipcode","website_url","geometry","lat","lon")
 
 # Define UI
 ui <- fluidPage(
@@ -36,7 +38,7 @@ ui <- fluidPage(
 
   id = "input_fields",
   fileInput("file","Upload the file"),
-  selectInput("consortium", "Select Consortium", choices = c("CTSA","CEGIR")),
+  selectInput("consortium", "Select Consortium", choices = c("CTSA","CEGIR"), selected = NULL),
   selectInput("ID", "Select Participant ID", choices = ""),
   textInput(inputId = 'new_address', label = 'Address Input', placeholder = "Enter the address"),
   textInput(inputId = 'out_filename', label = 'Output File Name', placeholder = "Enter output file name", value = "/tmp/output.csv"),
@@ -62,55 +64,88 @@ server <- function(input, output, session) {
   #drive_time_output <- reactiveVal(NULL)
   tempfile_path <- reactiveVal("/tmp/temp.csv")
   
+  drive_time_output_both <- reactiveVal(NULL)
   drive_time_output <- reactiveVal(NULL)
+  
   out_filename <- reactive(input$out_filename)
   score_threshold <- reactive(input$score_threshold)
-  consortium <- reactive(input$consortium)
+  consortium <- reactive(tolower(input$consortium))
   
   centers = reactiveVal(NULL)
   
-  observeEvent(input$consortium, {
-    req(consortium())
-    if (consortium() == "CTSA"){
+  
+  
+  # Initialize the map
+  output$map <- renderLeaflet({
+    leaflet() %>%
+    addTiles() %>%
+      setView(lng = -95.7129, lat = 37.0902, zoom = 4)
+  })
+  
+  
+  observe({
+    req(consortium(), drive_time_output())
+    if (consortium() == "ctsa"){
       centers(ctsa_centers)
-    }else if (consortium() == "CEGIR"){
+    }else if (consortium() == "cegir"){
       centers(cegir_centers)
       
     } 
+    
     updateSelectInput(session, "selected_center",choices = centers()$abbreviation)
     
     
+    leafletProxy("map") %>%
+      clearShapes() %>%
+      clearMarkers() %>%
+      addAwesomeMarkers(centers()$lon, centers()$lat, popup = centers()$abbreviation, label = centers()$abbreviation, 
+                                                        icon = icon.center, layerId = centers()$abbreviation
+      ) 
+    
   })
     
-  observeEvent(input$file, {
+  
 
+  
+  observeEvent(input$file, {
+  req(input$file)
     filename <- input$file$datapath
     
     
     drive_time_result <- rdcrn_run(list(filename = filename, out_filename = out_filename(), score_threshold = score_threshold()))
     
+ 
+    drive_time_output_both(drive_time_result)
+    
+  })
+  
+
+  observe({
+    req(consortium(), drive_time_output_both())
+
+    drive_time_result = drive_time_output_both()[[consortium()]]
+
     if (!is.null(drive_time_result) && nrow(drive_time_result) > 0) {
-      drive_time_result <- drive_time_result %>% 
+      drive_time_result <- drive_time_result %>%
         dplyr::rename_with(., stringr::str_to_lower)
-      
+
       # Assign ID if not available
       if (!"id" %in% colnames(drive_time_result)) {
         drive_time_result$id <- rownames(drive_time_result)
       }
-      
+
       drive_time_result <- drive_time_result %>%
         dplyr::mutate(id = as.character(id))
     }
 
     drive_time_output(drive_time_result)
-    
   })
-  
-
   
   
   
   observeEvent(input$submit_button, {
+    req(isTruthy(input$file) || (isTruthy(input$submit_button) && (isTruthy(input$new_address) || (isTruthy(input$new_lat) & isTruthy(input$new_lon)))))
+    
     shinyjs::reset("file")
     # Extract values from inputs
     address <- ifelse(!is.null(input$new_address), input$new_address, NA)
@@ -128,28 +163,16 @@ server <- function(input, output, session) {
     filename <- tempfile_path()
     
     drive_time_result <- rdcrn_run(list(filename = filename, out_filename = out_filename(), score_threshold = score_threshold()))
+  
     
-    if (!is.null(drive_time_result) && nrow(drive_time_result) > 0) {
-      drive_time_result <- drive_time_result %>% 
-        dplyr::rename_with(., stringr::str_to_lower)
-      
-      # Assign ID if not available
-      if (!"id" %in% colnames(drive_time_result)) {
-        drive_time_result$id <- rownames(drive_time_result)
-      }
-      
-      drive_time_result <- drive_time_result %>%
-        dplyr::mutate(id = as.character(id))
-    }
-    
-    drive_time_output(drive_time_result)
+    drive_time_output_both(drive_time_result)
     
   })
   
   observe({
     req(drive_time_output())
     #updateSelectInput(session, "ID", choices = drive_time_output()$id)
-    updateSelectInput(session, "ID", choices = drive_time_output()$id,selected = drive_time_output()$id[1])
+    updateSelectInput(session, "ID", choices = drive_time_output()$id)
     
   }
   
@@ -178,25 +201,17 @@ server <- function(input, output, session) {
   
   
   
-  # Initialize the map
-  output$map <- renderLeaflet({
-    leaflet(data = centers()) %>%
-      addTiles() %>%
-      addAwesomeMarkers(~lon, ~lat, popup = ~abbreviation, label = ~abbreviation, 
-                        icon = icon.center, layerId = ~abbreviation
-      ) %>%
-      setView(lng = -95.7129, lat = 37.0902, zoom = 4)
-  })
-  
   # Observe changes in the selected center and update the map
   observe({
+    req(drive_time_output(), centers())
     leafletProxy("map") %>%
       clearShapes()
     
-    if (!is.null(input$selected_center) && !is.null(selected_coordinates()$lat) && !is.null(selected_coordinates()$lon) && !is.null(drive_time_output())) {
+    if (!is.null(input$selected_center) && !is.null(selected_coordinates()$lat) && !is.null(selected_coordinates()$lon)) {
       selected_center_info_data <- centers() %>%
-        filter(abbreviation == input$selected_center) %>%
-        select(lat, lon, abbreviation, City, State)
+        filter(abbreviation == input$selected_center) %>% 
+        dplyr::rename_with(., stringr::str_to_lower) %>%
+        select(lat, lon, abbreviation, city, state)
       
       # Add a marker for the selected center with red color
       leafletProxy("map") %>%
@@ -237,6 +252,8 @@ server <- function(input, output, session) {
     marker_id <- input$map_marker_click$id
     # Update the selectedCenter input
     updateSelectInput(session, "selected_center", selected = centers()$abbreviation[centers()$abbreviation == marker_id])
+    
+
     
     # Remove the previously clicked marker (if any) and add a new one with blue color for the previously clicked marker
     if ((!is.null(session$userData$prev_marker_id) && session$userData$prev_marker_id != marker_id &&
@@ -288,13 +305,23 @@ server <- function(input, output, session) {
   })  
   
   
-  # Initialize the default selected center based on the nearest center
-  observeEvent(input$ID,{
+  observeEvent(input$consortium,{
+    session$userData$prev_marker_id = NULL
+    session$userData$nearest_center = NULL
     
+  })
+  
+  # Initialize the default selected center based on the nearest center
+  observeEvent({input$ID 
+              input$consortium
+              },{
+    req(centers())
+
     if (!is.null(input$ID) && !is.null(drive_time_output())) {
       nearest_center <- drive_time_output() %>%
         filter(id == input$ID) %>%
         pull(nearest_center)
+      
       
       if(!is.null(session$userData$prev_marker_id)){
         leafletProxy("map") %>%
@@ -305,7 +332,8 @@ server <- function(input, output, session) {
         
         
       }
-      
+
+
       if (!is.null(nearest_center)) {
         updateSelectInput(session, "selected_center", selected = nearest_center)
         
@@ -326,7 +354,8 @@ server <- function(input, output, session) {
         session$userData$nearest_center <- nearest_center
       }
     }
-  })
+    
+  }, ignoreInit = TRUE)
   
   observeEvent(input$reset_button, {
     updateSelectInput(session, "ID", choices = "")
@@ -353,7 +382,7 @@ server <- function(input, output, session) {
   output$info_table <- renderTable({
     if (!is.null(selected_coordinates()$lat) && !is.null(selected_coordinates()$lon) && !is.null(drive_time_output())) {
       drive_time_output() %>%
-        filter(lat == selected_coordinates()$lat & lon == selected_coordinates()$lon) 
+        filter(lat == selected_coordinates()$lat & lon == selected_coordinates()$lon)
     } else if (!is.null(input$ID) && !is.null(drive_time_output())) {
       drive_time_output() %>%
         filter(id == input$ID)
@@ -361,7 +390,7 @@ server <- function(input, output, session) {
       data.frame()
     }
   })
-  
+
 }
 
 # Run the application
