@@ -260,13 +260,8 @@ rdcrn_run <- function(opt){
   }
   output_ctsa_df = rdcrn_drivetime(drivetime_input, opt$out_filename,"ctsa")
   output_cegir_df = rdcrn_drivetime(drivetime_input, opt$out_filename,"cegir")
-  
-  if (opt$consortium == "ctsa"){ 
-    return(output_ctsa_df)
-  } else if (opt$consortium == "cegir"){
-    return(output_cegir_df)
-  } else {
-    return(list(ctsa = output_ctsa_df, cegir = output_cegir_df))
-  }
+
+  return(list(ctsa = output_ctsa_df, cegir = output_cegir_df))
+
 
 }
