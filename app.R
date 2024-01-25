@@ -109,6 +109,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$file, {
   req(input$file)
+    updateSelectInput(session, "ID", choices = "")
+    updateTextInput(session, "new_address", value = "")
     filename <- input$file$datapath
     
     
@@ -123,7 +125,7 @@ server <- function(input, output, session) {
   observe({
     req(consortium(), drive_time_output_both())
 
-    drive_time_result = drive_time_output_both()[[consortium()]]
+    drive_time_result = drive_time_output_both()
 
     if (!is.null(drive_time_result) && nrow(drive_time_result) > 0) {
       drive_time_result <- drive_time_result %>%
@@ -134,8 +136,14 @@ server <- function(input, output, session) {
         drive_time_result$id <- rownames(drive_time_result)
       }
 
+      # Define the pattern to create "nearest_center" and "distance" columns based on selected consortium
+      pattern <- paste0("_", consortium())
+      
+      # Extracting and creating new columns for those with the pattern
       drive_time_result <- drive_time_result %>%
-        dplyr::mutate(id = as.character(id))
+        dplyr::mutate(id = as.character(id),
+                      !!!setNames(.[, grepl(pattern, names(.))], sub(paste0(pattern, ".*"), "", names(.)[grepl(pattern, names(.))])))
+      
     }
 
     drive_time_output(drive_time_result)
