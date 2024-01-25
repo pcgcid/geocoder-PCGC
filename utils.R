@@ -78,7 +78,15 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "ctsa") {
   
   #output <- cbind(d$raw_data, min_centers)
   output <- d$raw_data %>% dplyr::select(-c(".row"))
-  write.csv(output, file = out_filename)
+  
+  #rename nearest_center column
+  output <- output %>%
+    dplyr::rename_with(~ paste0(.x,"_", consortium, recycle0=T),
+                       all_of(c("nearest_center", "distance")))
+  
+  #modify file name
+  #out_filename = sub("\\.csv", paste0("_",consortium, ".csv"), out_filename)
+  #write.csv(output, file = out_filename)
   output
 }
 
@@ -106,6 +114,7 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
     d_excluded_for_address <- dplyr::filter(d, cincy_inst_foster_addr | po_box | non_address_text)
     d_for_geocoding <- dplyr::filter(d, !cincy_inst_foster_addr & !po_box & !non_address_text)
   }
+  
   
   out_template <- tibble(
     street = NA, zip = NA, city = NA, state = NA,
@@ -260,8 +269,9 @@ rdcrn_run <- function(opt){
   }
   output_ctsa_df = rdcrn_drivetime(drivetime_input, opt$out_filename,"ctsa")
   output_cegir_df = rdcrn_drivetime(drivetime_input, opt$out_filename,"cegir")
-
-  return(list(ctsa = output_ctsa_df, cegir = output_cegir_df))
+  output_df = dplyr::inner_join(output_ctsa_df, output_cegir_df) 
+  write.csv(output_df, file = opt$out_filename)
+  return(output_df)
 
 
 }
