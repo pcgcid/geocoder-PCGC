@@ -46,7 +46,7 @@ ui <- fluidPage(
   
   numericInput("new_lat", "Enter Latitude", value = NA),
   numericInput("new_lon", "Enter Longitude", value = NA),
-  selectInput("selected_center", "Select Center", choices = "",selected = NULL),
+  #selectInput("selected_center", "Select Center", choices = "",selected = NULL),
   actionButton("submit_button", "Submit address or latitude & longtitude"),
   actionButton("reset_button", "Reset data"),
   
@@ -69,6 +69,8 @@ server <- function(input, output, session) {
   score_threshold <- reactive(input$score_threshold)
   consortium <- reactive(tolower(input$consortium))
   centers = reactiveVal(NULL)
+  
+  selected_center = reactiveVal(NULL)
   
   #reactive values resulting from geocoding functions
   drive_time_output_all <- reactiveVal(NULL)
@@ -97,7 +99,7 @@ server <- function(input, output, session) {
       
     } 
     
-    updateSelectInput(session, "selected_center",choices = centers()$abbreviation)
+    #updateSelectInput(session, "selected_center",choices = centers()$abbreviation)
     
     
     leafletProxy("map") %>%
@@ -221,13 +223,18 @@ server <- function(input, output, session) {
   
   # Observe changes in the selected center and update the map
   observe({
-    req(drive_time_output(), centers())
+    req(drive_time_output(), centers(),input$ID)
     leafletProxy("map") %>%
       clearShapes()
     
-    if (!is.null(input$selected_center) && !is.null(selected_coordinates()$lat) && !is.null(selected_coordinates()$lon)) {
+    if (!is.null(selected_coordinates()$lat) && !is.null(selected_coordinates()$lon)) {
+      if (is.null(input$map_marker_click$id)){
+        selected_center(pull(drive_time_output()[drive_time_output()$id == input$ID, 'nearest_center']))
+      }else{
+        selected_center(input$map_marker_click$id)
+      }
       selected_center_info_data <- centers() %>%
-        filter(abbreviation == input$selected_center) %>% 
+        filter(abbreviation == selected_center() ) %>% 
         dplyr::rename_with(., stringr::str_to_lower) %>%
         select(lat, lon, abbreviation, city, state)
       
@@ -269,7 +276,7 @@ server <- function(input, output, session) {
     # Get the clicked marker's ID
     marker_id <- input$map_marker_click$id
     # Update the selectedCenter input
-    updateSelectInput(session, "selected_center", selected = centers()$abbreviation[centers()$abbreviation == marker_id])
+    #updateSelectInput(session, "selected_center", selected = centers()$abbreviation[centers()$abbreviation == marker_id])
     
 
     
@@ -353,7 +360,7 @@ server <- function(input, output, session) {
 
 
       if (!is.null(nearest_center)) {
-        updateSelectInput(session, "selected_center", selected = nearest_center)
+        #updateSelectInput(session, "selected_center", selected = nearest_center)
         
         if (!is.null(session$userData$nearest_center)){
           leafletProxy("map") %>%
@@ -380,7 +387,7 @@ server <- function(input, output, session) {
     updateTextInput(session, "new_address", value = "")
     updateNumericInput(session, "new_lat", value = NA)
     updateNumericInput(session, "new_lon", value = NA)
-    updateSelectInput(session, "selected_center", choices = centers()$abbreviation, selected = NULL)
+    #updateSelectInput(session, "selected_center", choices = centers()$abbreviation, selected = NULL)
     updateNumericInput(session, "score_threshold", value = 0.5)
     shinyjs::reset("file")
     drive_time_output(NULL)
@@ -396,15 +403,15 @@ server <- function(input, output, session) {
   })
   
   
-  selected_data <- eventReactive(input$selected_center,{
+  selected_data <- eventReactive(selected_center(),{
     if (!is.null(input$ID) && !is.null(drive_time_output())) {
       distances = drive_time_output_all()[[paste0('d_',consortium(),'_list')]][[input$ID]]
       
       
       drive_time_output() %>%
         filter(id == input$ID) %>%
-        mutate(selected_center = input$selected_center ,
-               d_to_selected_center = distances[[input$selected_center]])
+        mutate(selected_center = selected_center() ,
+               d_to_selected_center = distances[[selected_center()]])
         
     } else {
       data.frame()
