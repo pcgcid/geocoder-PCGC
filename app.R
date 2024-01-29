@@ -64,14 +64,19 @@ server <- function(input, output, session) {
   #drive_time_output <- reactiveVal(NULL)
   tempfile_path <- reactiveVal("/tmp/temp.csv")
   
-  drive_time_output_both <- reactiveVal(NULL)
-  drive_time_output <- reactiveVal(NULL)
-  
+  #reactive values from user input
   out_filename <- reactive(input$out_filename)
   score_threshold <- reactive(input$score_threshold)
   consortium <- reactive(tolower(input$consortium))
-  
   centers = reactiveVal(NULL)
+  
+  #reactive values resulting from geocoding functions
+  drive_time_output_all <- reactiveVal(NULL)
+  drive_time_output <- reactiveVal(NULL)
+  d_ctsa_list <- reactiveVal(NULL)
+  d_cegir_list <- reactiveVal(NULL)
+
+  
   
   
   
@@ -117,15 +122,20 @@ server <- function(input, output, session) {
     drive_time_result <- rdcrn_run(list(filename = filename, out_filename = out_filename(), score_threshold = score_threshold()))
     
  
-    drive_time_output_both(drive_time_result)
+    drive_time_output_all(drive_time_result)
     
   })
   
 
   observe({
-    req(consortium(), drive_time_output_both())
+    req(consortium(), drive_time_output_all())
 
-    drive_time_result = drive_time_output_both()
+    drive_time_result = drive_time_output_all()$output_df %>%
+      select(-address, -matches("^matched"))
+    
+    d_ctsa_list(drive_time_output_all()$d_ctsa_list)
+    d_cegir_list(drive_time_output_all()$d_cegir_list)
+    
 
     if (!is.null(drive_time_result) && nrow(drive_time_result) > 0) {
       drive_time_result <- drive_time_result %>%
@@ -173,7 +183,7 @@ server <- function(input, output, session) {
     drive_time_result <- rdcrn_run(list(filename = filename, out_filename = out_filename(), score_threshold = score_threshold()))
   
     
-    drive_time_output_both(drive_time_result)
+    drive_time_output_all(drive_time_result)
     
   })
   
@@ -386,18 +396,24 @@ server <- function(input, output, session) {
   })
   
   
-  
-  output$info_table <- renderTable({
-    if (!is.null(selected_coordinates()$lat) && !is.null(selected_coordinates()$lon) && !is.null(drive_time_output())) {
+  selected_data <- eventReactive(input$selected_center,{
+    if (!is.null(input$ID) && !is.null(drive_time_output())) {
+      distances = drive_time_output_all()[[paste0('d_',consortium(),'_list')]][[input$ID]]
+      
+      
       drive_time_output() %>%
-        filter(lat == selected_coordinates()$lat & lon == selected_coordinates()$lon)
-    } else if (!is.null(input$ID) && !is.null(drive_time_output())) {
-      drive_time_output() %>%
-        filter(id == input$ID)
+        filter(id == input$ID) %>%
+        mutate(selected_center = input$selected_center ,
+               d_to_selected_center = distances[[input$selected_center]])
+        
     } else {
       data.frame()
     }
   })
+  
+  
+  
+  output$info_table <- renderTable(selected_data())
 
 }
 
