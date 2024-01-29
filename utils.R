@@ -37,6 +37,10 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "ctsa") {
   centers = centers %>% arrange(abbreviation)
   
   d <- dht::read_lat_lon_csv(filename, nest_df = T, sf_out = T, project_to_crs = 5072)
+  d$d = d$d %>% dplyr::rename_with(., stringr::str_to_lower) 
+  d$raw_data = d$raw_data %>% dplyr::rename_with(., stringr::str_to_lower) 
+  
+
   isochrones <- readRDS(glue::glue(iso_filename))
   dx <- sapply(isochrones, function(x) {
     message("isochrones -- match start")
@@ -44,12 +48,12 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "ctsa") {
     result = st_join(d$d, x, largest = F) %>%
       tidyr::unnest(.rows) %>%
       dplyr::distinct(.row, .keep_all = TRUE) 
-    
+
+
     result$drive_time
     # this interferers with results -- message("isochrones -- match done")
   }) 
-  
-  
+
   
   
   #dx <- sapply(dx, FUN = function(x) x[1])
@@ -67,12 +71,23 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "ctsa") {
   
   not_found <- length(centers$abbreviation) + 1
   mins[is.na(mins == 0)] <- not_found
-  min_centers <- centers$abbreviation[unlist(mins)]
+  min_centers <- colnames(df)[unlist(mins)]
   
   # skip duplicates -- FIXME: flag them
   indexes <- apply(d$d[,1,drop=FALSE], 1, function(x) { unlist(x)[1] })
+  
   suppressWarnings(d$raw_data$nearest_center[indexes] <- min_centers)
   suppressWarnings(d$raw_data$distance[indexes] <- distance)
+  
+  # Slice df into a list, with each row as an element
+  list_of_rows <-  split(df, seq(nrow(df)))
+  
+  
+  suppressWarnings(d$raw_data$d_to_centers[indexes] <- list_of_rows)
+  d_to_centers <- setNames(d$raw_data$d_to_centers, d$raw_data$id)
+  
+  d$raw_data = d$raw_data %>% 
+    dplyr::select(-d_to_centers)
   
   # save(d, mins, dx, df,  min_centers, file="/Users/kouzy6/tmp/geocoder-drivetime/x.rds")
   
@@ -86,8 +101,12 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "ctsa") {
   
   #modify file name
   #out_filename = sub("\\.csv", paste0("_",consortium, ".csv"), out_filename)
-  #write.csv(output, file = out_filename)
-  output
+  write.csv(output, file = out_filename,row.names = F)
+  if (consortium == "ctsa"){
+    return(list(output = output, d_to_ctsa_centers = d_to_centers))
+  }else if (consortium == "cegir"){
+    return(list(output = output, d_to_cegir_centers = d_to_centers))
+  }
 }
 
 
@@ -97,7 +116,8 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
   d <- readr::read_csv(filename, show_col_types = FALSE)
   # d <- readr::read_csv('test/my_address_file.csv')
   # d <- readr::read_csv('test/my_address_file_missing.csv')
-  
+
+    
   ## must contain character column called address
   if (!"address" %in% names(d)) stop("no column called address found in the input file", call. = FALSE)
   
@@ -267,11 +287,17 @@ rdcrn_run <- function(opt){
   } else {
     drivetime_input <- opt$filename
   }
-  output_ctsa_df = rdcrn_drivetime(drivetime_input, opt$out_filename,"ctsa")
-  output_cegir_df = rdcrn_drivetime(drivetime_input, opt$out_filename,"cegir")
+  
+  output_ctsa = rdcrn_drivetime(drivetime_input, opt$out_filename,"ctsa")
+  output_ctsa_df = output_ctsa$output
+  d_ctsa_list = output_ctsa$d_to_ctsa_centers
+    
+  output_cegir = rdcrn_drivetime(drivetime_input, opt$out_filename,"cegir")
+  output_cegir_df = output_cegir$output
+  d_cegir_list = output_cegir$d_to_cegir_centers
+  
   output_df = dplyr::inner_join(output_ctsa_df, output_cegir_df) 
-  write.csv(output_df, file = opt$out_filename)
-  return(output_df)
-
-
+  write.csv(output_df, file = opt$out_filename,row.names = F)
+  
+  return(list(output_df = output_df, d_ctsa_list = d_ctsa_list, d_cegir_list = d_cegir_list))
 }
