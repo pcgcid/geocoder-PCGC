@@ -11,6 +11,9 @@ library(tidygraph)
 library(ggraph)
 library(leaflet.extras)
 library(tibble)
+library(DT)
+library(shinyjs)
+
 
 
 
@@ -36,23 +39,51 @@ colnames(cegir_centers) <- c("abbreviation", "consortium" ,"name","address","cit
 ui <- fluidPage(
   shinyjs::useShinyjs(),
 
-  id = "input_fields",
-  fileInput("file","Upload the file"),
-  selectInput("consortium", "Select Consortium", choices = c("CTSA","CEGIR"), selected = NULL),
-  selectInput("ID", "Select Participant ID", choices = ""),
-  textInput(inputId = 'new_address', label = 'Address Input', placeholder = "Enter the address"),
-  textInput(inputId = 'out_filename', label = 'Output File Name', placeholder = "Enter output file name", value = "/tmp/output.csv"),
-  numericInput("score_threshold", "Enter score threshold", value = 0.5),
+  sidebarLayout(
+    sidebarPanel(
+    titlePanel("User input"),
+    id = "input_fields",
+    fileInput("file","Upload the file"),
+    selectInput("consortium", "Select Consortium", choices = c("CTSA","CEGIR"), selected = NULL),
+    selectInput("ID", "Select Participant ID", choices = ""),
+    textInput(inputId = 'new_address', label = 'Address Input', placeholder = "Enter the address"),
+    textInput(inputId = 'out_filename', label = 'Output File Name', placeholder = "Enter output file name", value = "/tmp/output.csv"),
+    numericInput("score_threshold", "Enter score threshold", value = 0.5),
+    
+    numericInput("new_lat", "Enter Latitude", value = NA),
+    numericInput("new_lon", "Enter Longitude", value = NA),
+    #selectInput("selected_center", "Select Center", choices = "",selected = NULL),
+    actionButton("submit_button", "Submit address or latitude & longtitude"),
+    actionButton("reset_button", "Reset data")
+  ),
+  mainPanel(
+    # Conditional rendering of text based on the number of rows in the table
+    uiOutput("message2"),
+    
+    div(
+      style = "display: flex; height: 15vh; overflow-x:auto; overflow-y:auto;",
+      tableOutput("info_table")
+    )
+  ,
+
+    div(
+      style = "display: flex; align-items: center; justify-content: center; height: 45vh;",
+      
+      leafletOutput("map")
+    ),
+  uiOutput("message"),
   
-  numericInput("new_lat", "Enter Latitude", value = NA),
-  numericInput("new_lon", "Enter Longitude", value = NA),
-  #selectInput("selected_center", "Select Center", choices = "",selected = NULL),
-  actionButton("submit_button", "Submit address or latitude & longtitude"),
-  actionButton("reset_button", "Reset data"),
-  
-  leafletOutput("map"),
-  tableOutput("info_table")
+  div(
+    style = "display: flex; overflow-x:auto; overflow-y:auto;",
+    tableOutput("warning_table")
+    )
+  )
+
+  )
 )
+
+  
+
 
 
 
@@ -333,6 +364,7 @@ server <- function(input, output, session) {
   observeEvent(input$consortium,{
     session$userData$prev_marker_id = NULL
     session$userData$nearest_center = NULL
+    selected_center(NULL)
     
   })
   
@@ -402,11 +434,38 @@ server <- function(input, output, session) {
       
   })
   
+  failed_data <- reactive({
+    req(drive_time_output())
+    if (!is.null(drive_time_output())){
+      d = drive_time_output() %>%
+        filter(is.na(precision))
+      if (nrow(d) > 0){
+        return(d)
+      }else(data.frame())
+
+    }else{
+      data.frame()
+    }
+  })
+  
+  # Output the table
+  output$warning_table <- renderTable(failed_data())
+  
+  output$message = renderUI({
+    req(failed_data())
+    if (!is.null(failed_data()) ) {
+      if (nrow(failed_data()) > 0)
+        tags$h4("Please examine the unsuccessfully geocoded data")
+    }
+  })
+  
+  
+  
+  
   
   selected_data <- eventReactive(selected_center(),{
     if (!is.null(input$ID) && !is.null(drive_time_output())) {
       distances = drive_time_output_all()[[paste0('d_',consortium(),'_list')]][[input$ID]]
-      
       
       drive_time_output() %>%
         filter(id == input$ID) %>%
@@ -421,6 +480,17 @@ server <- function(input, output, session) {
   
   
   output$info_table <- renderTable(selected_data())
+  
+  output$message2 = renderUI({
+    req(selected_data())
+    if (!is.null(selected_data()) ) {
+      if (nrow(selected_data()) > 0)
+        "Selected participant's data:"
+    }
+  })
+  
+  
+  
 
 }
 
