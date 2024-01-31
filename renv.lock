@@ -17,6 +17,23 @@
       "Hash": "b2866e62bab9378c3cc9476a1954226b",
       "Requirements": []
     },
+    "DT": {
+      "Package": "DT",
+      "Version": "0.31",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "77b5189f5272ae2b21e3ac2175ad107c",
+      "Requirements": [
+        "crosstalk",
+        "htmltools",
+        "htmlwidgets",
+        "httpuv",
+        "jquerylib",
+        "jsonlite",
+        "magrittr",
+        "promises"
+      ]
+    },
     "KernSmooth": {
       "Package": "KernSmooth",
       "Version": "2.23-21",
@@ -1122,10 +1139,10 @@
     },
     "stringr": {
       "Package": "stringr",
-      "Version": "1.5.0",
+      "Version": "1.5.1",
       "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "671a4d384ae9d32fc47a14e98bfa3dc8",
+      "Repository": "RSPM",
+      "Hash": "960e2ae9e09656611e0b8214ad543207",
       "Requirements": [
         "cli",
         "glue",
