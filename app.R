@@ -61,13 +61,13 @@ ui <- fluidPage(
     uiOutput("message2"),
     
     div(
-      style = "display: flex; height: 15vh; overflow-x:auto; overflow-y:auto;",
+      style = "display: flex; height: 10vh; overflow-x:auto; overflow-y:auto;",
       tableOutput("info_table")
     )
   ,
 
     div(
-      style = "display: flex; align-items: center; justify-content: center; height: 45vh;",
+      style = "display: flex; align-items: center; justify-content: center; height: 55vh;",
       
       leafletOutput("map")
     ),
@@ -259,11 +259,7 @@ server <- function(input, output, session) {
       clearShapes()
     
     if (!is.null(selected_coordinates()$lat) && !is.null(selected_coordinates()$lon)) {
-      if (is.null(input$map_marker_click$id)){
-        selected_center(pull(drive_time_output()[drive_time_output()$id == input$ID, 'nearest_center']))
-      }else{
-        selected_center(input$map_marker_click$id)
-      }
+
       selected_center_info_data <- centers() %>%
         filter(abbreviation == selected_center() ) %>% 
         dplyr::rename_with(., stringr::str_to_lower) %>%
@@ -309,7 +305,8 @@ server <- function(input, output, session) {
     # Update the selectedCenter input
     #updateSelectInput(session, "selected_center", selected = centers()$abbreviation[centers()$abbreviation == marker_id])
     
-
+    selected_center(input$map_marker_click$id)
+    
     
     # Remove the previously clicked marker (if any) and add a new one with blue color for the previously clicked marker
     if ((!is.null(session$userData$prev_marker_id) && session$userData$prev_marker_id != marker_id &&
@@ -368,6 +365,8 @@ server <- function(input, output, session) {
     
   })
   
+
+  
   # Initialize the default selected center based on the nearest center
   observeEvent({input$ID 
               input$consortium
@@ -409,7 +408,11 @@ server <- function(input, output, session) {
         
         
         session$userData$nearest_center <- nearest_center
+        
+        selected_center(nearest_center)
+        
       }
+      
     }
     
   }, ignoreInit = TRUE)
