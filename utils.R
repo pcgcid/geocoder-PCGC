@@ -74,16 +74,21 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "ctsa") {
   min_centers <- colnames(df)[unlist(mins)]
   
   # skip duplicates -- FIXME: flag them
-  indexes <- apply(d$d[,1,drop=FALSE], 1, function(x) { unlist(x)[1] })
+  indexes <- unlist(d$d[[".rows"]])
   
-  suppressWarnings(d$raw_data$nearest_center[indexes] <- min_centers)
-  suppressWarnings(d$raw_data$distance[indexes] <- distance)
+  d$raw_data$nearest_center <- NA
+  d$raw_data$distance <- NA
+  d$raw_data$d_to_centers <- NA
+  
+  
+  d$raw_data$nearest_center[indexes] <- min_centers
+  d$raw_data$distance[indexes] <- distance
   
   # Slice df into a list, with each row as an element
   list_of_rows <-  split(df, seq(nrow(df)))
   
   
-  suppressWarnings(d$raw_data$d_to_centers[indexes] <- list_of_rows)
+  d$raw_data$d_to_centers[indexes] <- list_of_rows
   d_to_centers <- setNames(d$raw_data$d_to_centers, d$raw_data$id)
   
   d$raw_data = d$raw_data %>% 
@@ -95,10 +100,14 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "ctsa") {
   output <- d$raw_data %>% dplyr::select(-c(".row"))
   
   #rename nearest_center column
-  output <- output %>%
+  output <- output %>%     
+    dplyr::select(-matches(paste0('_',consortium))) %>%
     dplyr::rename_with(~ paste0(.x,"_", consortium, recycle0=T),
                        all_of(c("nearest_center", "distance")))
-  
+  # output <- output %>%
+  #   dplyr::rename(all_of(c("nearest_center", "distance"),
+  #                        ~ paste0(.x,"_", consortium), .override = TRUE))
+
   #modify file name
   #out_filename = sub("\\.csv", paste0("_",consortium, ".csv"), out_filename)
   write.csv(output, file = out_filename,row.names = F)
