@@ -13,7 +13,7 @@ library(leaflet.extras)
 library(tibble)
 library(DT)
 library(shinyjs)
-
+library(shinyBS)
 
 
 
@@ -43,12 +43,17 @@ ui <- fluidPage(
     sidebarPanel(
     titlePanel("User input"),
     id = "input_fields",
+    helpText("Please specify any parameters you wish to change before uploading file or submit an address"),
+    helpText("Note: If you want to input an address manually, please hit “Reset data” if a file was previously uploaded"),
     fileInput("file","Upload the file"),
     selectInput("consortium", "Select Consortium", choices = c("CTSA","CEGIR"), selected = NULL),
     selectInput("ID", "Select Participant ID", choices = ""),
     textInput(inputId = 'new_address', label = 'Address Input', placeholder = "Enter the address"),
     textInput(inputId = 'out_filename', label = 'Output File Name', placeholder = "Enter output file name", value = "/tmp/output.csv"),
     numericInput("score_threshold", "Enter score threshold", value = 0.5),
+    
+    bsTooltip(id = "score_threshold", title = "", 
+              placement = "left", trigger = "hover"),
     
     numericInput("new_lat", "Enter Latitude", value = NA),
     numericInput("new_lon", "Enter Longitude", value = NA),
@@ -222,8 +227,8 @@ server <- function(input, output, session) {
   
   observe({
     req(drive_time_output())
-    #updateSelectInput(session, "ID", choices = drive_time_output()$id)
     updateSelectInput(session, "ID", choices = drive_time_output()$id)
+    #updateSelectInput(session, "ID", choices = unique(drive_time_output()[drive_time_output()$geocode_result == 'geocoded','id']))
     
   }
   
@@ -441,7 +446,7 @@ server <- function(input, output, session) {
     req(drive_time_output())
     if (!is.null(drive_time_output())){
       d = drive_time_output() %>%
-        filter(is.na(precision))
+        filter(geocode_result != 'geocoded')
       if (nrow(d) > 0){
         return(d)
       }else(data.frame())
@@ -466,7 +471,7 @@ server <- function(input, output, session) {
   
   
   
-  selected_data <- eventReactive(selected_center(),{
+  selected_data <- eventReactive(list(input$ID,selected_center()),{
     if (!is.null(input$ID) && !is.null(drive_time_output())) {
       distances = drive_time_output_all()[[paste0('d_',consortium(),'_list')]][[input$ID]]
       
