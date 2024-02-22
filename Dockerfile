@@ -35,14 +35,16 @@ RUN apt-get update && apt-get install -y \
     libv8-dev\
     libfontconfig1-dev \
     libfreetype6-dev \
+    ruby-full \
     && apt-get clean
 
 
 # Install necessary R packages
 #RUN R -e "install.packages(c('systemfonts', 'ggplot2'), dependencies=TRUE)"
 
+RUN gem install sqlite3 -v 1.6.0
 
-RUN gem install sqlite3 json Text
+RUN gem install json Text
 
 RUN mkdir /app
 WORKDIR /app
