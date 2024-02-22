@@ -219,7 +219,21 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
   ## clean up 'bad' address columns / filter to precise geocodes
   cli::cli_alert_info("geocoding complete; now filtering to precise geocodes...", wrap = TRUE)
   if (score_threshold == "all") {
-    out_file <- d_for_geocoding
+    out_file <- d_for_geocoding %>%
+      dplyr::mutate(
+        geocode_result = dplyr::case_when(
+          po_box ~ "po_box",
+          cincy_inst_foster_addr ~ "cincy_inst_foster_addr",
+          non_address_text ~ "non_address_text",
+          (!precision %in% c("street", "range")) ~ "imprecise_geocode",
+          TRUE ~ "geocoded"
+        )
+        # ,
+        # lat = ifelse(geocode_result != "geocoded", NA, lat),
+        # lon = ifelse(geocode_result != "geocoded", NA, lon)
+      ) %>%
+      select(-po_box, -cincy_inst_foster_addr, -non_address_text) # note, just "PO" not "PO BOX" is not flagged as "po_box"
+    
   } else {
     out_file <- dplyr::bind_rows(d_excluded_for_address, d_for_geocoding) %>%
       dplyr::mutate(
