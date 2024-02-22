@@ -50,10 +50,10 @@ ui <- fluidPage(
     selectInput("ID", "Select Participant ID", choices = ""),
     textInput(inputId = 'new_address', label = 'Address Input', placeholder = "Enter the address"),
     textInput(inputId = 'out_filename', label = 'Output File Name', placeholder = "Enter output file name", value = "/tmp/output.csv"),
-    numericInput("score_threshold", "Enter score threshold", value = 0.5),
+    textInput("score_threshold", "Enter score threshold","0.5"),
     
-    bsTooltip(id = "score_threshold", title = "", 
-              placement = "left", trigger = "hover"),
+    bsTooltip(id = "score_threshold", title = "'all' or a numeric value as a threshold to be classified as 'geocoded'", 
+              placement = "right", trigger = "hover"),
     
     numericInput("new_lat", "Enter Latitude", value = NA),
     numericInput("new_lon", "Enter Longitude", value = NA),
@@ -102,7 +102,7 @@ server <- function(input, output, session) {
   
   #reactive values from user input
   out_filename <- reactive(input$out_filename)
-  score_threshold <- reactive(input$score_threshold)
+  score_threshold <- reactive(type.convert(input$score_threshold, as.is = T))
   consortium <- reactive(tolower(input$consortium))
   centers = reactiveVal(NULL)
   
@@ -192,6 +192,11 @@ server <- function(input, output, session) {
         dplyr::mutate(id = as.character(id),
                       !!!setNames(.[, grepl(pattern, names(.))], sub(paste0(pattern, ".*"), "", names(.)[grepl(pattern, names(.))])))
       
+      if (!"geocode_result" %in% colnames(drive_time_result)){
+        drive_time_result = drive_time_result %>%
+          dplyr::mutate(geocode_result = ifelse(!(is.na(lat) & is.na(lon)),"geocoded",NA ))
+      }
+      
     }
 
     drive_time_output(drive_time_result)
@@ -225,14 +230,14 @@ server <- function(input, output, session) {
     
   })
   
-  observe({
+
+  
+  observeEvent(list(drive_time_output(),input$file),{
     req(drive_time_output())
     updateSelectInput(session, "ID", choices = drive_time_output()$id)
     #updateSelectInput(session, "ID", choices = unique(drive_time_output()[drive_time_output()$geocode_result == 'geocoded','id']))
     
-  }
-  
-  )
+  })
   
 
   # Observe block to update output whenever the file is uploaded
@@ -366,7 +371,7 @@ server <- function(input, output, session) {
   observeEvent(input$consortium,{
     session$userData$prev_marker_id = NULL
     session$userData$nearest_center = NULL
-    selected_center(NULL)
+    #selected_center(NULL)
     
   })
   
@@ -473,12 +478,18 @@ server <- function(input, output, session) {
   
   selected_data <- eventReactive(list(input$ID,selected_center()),{
     if (!is.null(input$ID) && !is.null(drive_time_output())) {
-      distances = drive_time_output_all()[[paste0('d_',consortium(),'_list')]][[input$ID]]
-      
-      drive_time_output() %>%
-        filter(id == input$ID) %>%
-        mutate(selected_center = selected_center() ,
-               d_to_selected_center = distances[[selected_center()]])
+      data = drive_time_output() %>%
+        filter(id == input$ID) 
+      #if data is geocoded, look for closest center. Otherwise, return empty dataframe
+      if (!is.na(data$lat[1])){
+        distances = drive_time_output_all()[[paste0('d_',consortium(),'_list')]][[input$ID]]
+        #print(distances[[selected_center()]])
+        
+        data = data %>%
+          mutate(selected_center = selected_center() ,
+                 d_to_selected_center = distances[[selected_center()]])
+      }
+      data
         
     } else {
       data.frame()
