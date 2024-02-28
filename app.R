@@ -30,10 +30,9 @@ icon.ion <- makeAwesomeIcon(icon = "home", markerColor = "green",
 # Load data from CSV files
 # if (file.exists("./output.csv")){
 #   drive_time_output <- read.csv("./output.csv")}
-ctsa_centers <- read.csv("/app/ctsa_centers.csv")
-cegir_centers <- read.csv("/app/CEGIRSites.csv")
-colnames(cegir_centers) <- c("abbreviation", "consortium" ,"name","address","city","state","country",
-                             "zipcode","website_url","geometry","lat","lon")
+pcgc_centers <- read.csv("/app/pcgc_isochrones.csv")
+# colnames(cegir_centers) <- c("abbreviation", "consortium" ,"name","address","city","state","country",
+#                              "zipcode","website_url","geometry","lat","lon")
 
 # Define UI
 ui <- fluidPage(
@@ -46,7 +45,7 @@ ui <- fluidPage(
     helpText("Please specify any parameters you wish to change before uploading file or submit an address"),
     helpText("Note: If you want to input an address manually, please hit “Reset data” if a file was previously uploaded"),
     fileInput("file","Upload the file"),
-    selectInput("consortium", "Select Consortium", choices = c("CTSA","CEGIR"), selected = NULL),
+    selectInput("consortium", "Select Consortium", choices = c("PCGC"), selected = NULL),
     selectInput("ID", "Select Participant ID", choices = ""),
     textInput(inputId = 'new_address', label = 'Address Input', placeholder = "Enter the address"),
     textInput(inputId = 'out_filename', label = 'Output File Name', placeholder = "Enter output file name", value = "/tmp/output.csv"),
@@ -111,7 +110,7 @@ server <- function(input, output, session) {
   #reactive values resulting from geocoding functions
   drive_time_output_all <- reactiveVal(NULL)
   drive_time_output <- reactiveVal(NULL)
-  d_ctsa_list <- reactiveVal(NULL)
+  d_pcgc_list <- reactiveVal(NULL)
   d_cegir_list <- reactiveVal(NULL)
 
   
@@ -128,8 +127,8 @@ server <- function(input, output, session) {
   
   observe({
     req(consortium(), drive_time_output())
-    if (consortium() == "ctsa"){
-      centers(ctsa_centers)
+    if (consortium() == "pcgc"){
+      centers(pcgc_centers)
     }else if (consortium() == "cegir"){
       centers(cegir_centers)
       
@@ -156,8 +155,8 @@ server <- function(input, output, session) {
     updateTextInput(session, "new_address", value = "")
     filename <- input$file$datapath
     
-    
-    drive_time_result <- rdcrn_run(list(filename = filename, out_filename = out_filename(), score_threshold = score_threshold()))
+    print(exists(opt$site))
+    drive_time_result <- rdcrn_run(list(site="PCGC_CHOP",filename = filename, out_filename = out_filename(), score_threshold = score_threshold()))
     
  
     drive_time_output_all(drive_time_result)
@@ -171,7 +170,7 @@ server <- function(input, output, session) {
     drive_time_result = drive_time_output_all()$output_df %>%
       select(-address, -matches("^matched"))
     
-    d_ctsa_list(drive_time_output_all()$d_ctsa_list)
+    d_pcgc_list(drive_time_output_all()$d_pcgc_list)
     d_cegir_list(drive_time_output_all()$d_cegir_list)
     
 

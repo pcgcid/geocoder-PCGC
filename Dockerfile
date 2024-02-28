@@ -12,8 +12,15 @@ LABEL "org.degauss.version"="${degauss_version}"
 LABEL "org.degauss.description"="${degauss_description}"
 LABEL "org.degauss.argument"="${degauss_argument}"
 
+# Create the directory if it doesn't exist
+#RUN mkdir -p /opt/
+
 ADD https://geomarker.s3.amazonaws.com/geocoder_2021.db /opt/geocoder.db
 # COPY geocoder.db /opt/geocoder.db
+ADD https://geomarker.s3.us-east-2.amazonaws.com/geometries/tracts_2010_sf_5072.rds /opt/tracts_2010_sf_5072.rds
+ADD https://geomarker.s3.us-east-2.amazonaws.com/tract_dep_index_2018.rds /opt/tract_dep_index_18.rds
+
+
 
 RUN apt-get update && apt-get install -y \
     libssl-dev \
@@ -49,6 +56,7 @@ RUN gem install json Text
 RUN mkdir /app
 WORKDIR /app
 
+
 COPY Makefile.ruby .
 COPY /src ./src
 COPY /lib ./lib
@@ -80,8 +88,8 @@ COPY entrypoint.R .
 COPY utils.R .
 
 
-COPY ./ctsa_centers.csv /app
-COPY ./isochrones.rds /app
+COPY ./pcgc_isochrones.csv /app
+COPY ./isochrones_pcgc_no_overlap.rds /app
 COPY ./app.R /app
 COPY ./. /app
 

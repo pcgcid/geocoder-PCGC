@@ -11,7 +11,7 @@ withr::with_message_sink("/dev/null", library(knitr))
 
 doc <- "
       Usage:
-        entrypoint.R [<filename>] [<out_filename>] [<score_threshold>] [--shiny] 
+        entrypoint.R <site> [<filename>] [<out_filename>] [<score_threshold>] [--shiny] 
         entrypoint.R (-h | --help)
          
       Options:
@@ -19,7 +19,9 @@ doc <- "
         --shiny       Start shiny server on port 3838.
       "
 opt <- docopt::docopt(doc)
-if (!is.null(opt$filename)){
+
+
+if (!is.null(opt$filename) & !is.null(opt$site)){
   rdcrn_run(opt) }
 
 if (opt$shiny) {
