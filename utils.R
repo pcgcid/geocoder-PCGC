@@ -59,9 +59,8 @@ rdcrn_drivetime_selected_center <- function(filename, out_filename, selected_sit
   
 
   colnames(out)[which(colnames(out)=="drive_time")] <- paste0("drive_time_", selected_site)
+  write.csv(out,out_filename, na = "")
   
-  
-  write.csv(out,out_filename)
   out
 
 }
@@ -434,12 +433,34 @@ rdcrn_run <- function(opt){
   selected_site <- opt$site
   write.csv(output_dep, file = opt$out_filename,row.names = F)
   
-  drivetime_input = rdcrn_drivetime_selected_center(opt$out_filename, opt$out_filename,selected_site) 
+  rdcrn_drivetime_selected_center(opt$out_filename, opt$out_filename,selected_site) 
+  
+  output = rdcrn_drivetime(opt$out_filename, opt$out_filename,"pcgc")
+  
+  if(!is.null(opt$include_deid_fields)){
+    field_list = unlist(strsplit(opt$include_deid_fields,","))
+    if (length(opt$include_deid_fields) == 1 & length(field_list) > 1){
+      field_list = trimws(field_list)
+    }else{
+      field_list = opt$include_deid_fields
+    }
+    output_deid = output %>% dplyr::select(field_list)
+  }
+  
+  phi_fields = c("id","address","matched_street",	"matched_zip","matched_city",	"matched_state","lat",
+                 "lon", "census_tract_id")
+  output_phi = output %>% dplyr::select(phi_fields)
+  
+  
+  write.csv(drivetime_input,opt$out_filename)
+  
   #return(list(output_df = output_pcgc_df, d_pcgc_list = d_pcgc_list, output_dep = output_dep))
   
-  output_pcgc = rdcrn_drivetime(opt$out_filename, opt$out_filename,"pcgc")
-  output_pcgc_df = output_pcgc$output
-  d_pcgc_list = output_pcgc$d_to_pcgc_centers
-
-  return(list(output_df = output_pcgc_df, d_pcgc_list = d_pcgc_list))
+  # if (opt$shiny){
+  #   output_pcgc = rdcrn_drivetime(opt$out_filename, opt$out_filename,"pcgc")
+  #   output_pcgc_df = output_pcgc$output
+  #   d_pcgc_list = output_pcgc$d_to_pcgc_centers
+  # 
+  #   return(list(output_df = output_pcgc_df, d_pcgc_list = d_pcgc_list))
+  # }
 }
