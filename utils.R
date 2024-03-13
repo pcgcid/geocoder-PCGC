@@ -8,6 +8,7 @@ library(knitr)
 
 
 rdcrn_drivetime_selected_center <- function(filename, out_filename, selected_site) {
+  require(dplyr)
   #browser()
   centers_filename <- Sys.getenv("CENTERS_FILENAME", '/app/pcgc_isochrones.csv')
   output_filename <- Sys.getenv("OUTPUT_FILENAME", "/app/output.csv")
@@ -30,21 +31,21 @@ rdcrn_drivetime_selected_center <- function(filename, out_filename, selected_sit
   # dht::check_for_column(d$raw_data, "lat", d$raw_data$lat)
   # dht::check_for_column(d$raw_data, "lon", d$raw_data$lon)
   # 
-  message('loading isochrone shape file...')
+  cat('loading isochrone shape file...\n')
   isochrones <- readRDS(glue::glue("/app/isochrones_pcgc_no_overlap.rds"))[[selected_site]] # 5072 projection
   
   ## add code here to calculate geomarkers
-  message('finding drive time for each point...')
+  cat('finding drive time for each point...\n')
   #d$d <- suppressWarnings( st_join(d$d, isochrones, largest = F) )
   
-  message('finding distance (m) for each point...')
+  cat('finding distance (m) for each point...\n')
   
   centers <- centers %>% 
     filter(abbreviation == selected_site) %>% 
     st_as_sf(coords = c('lon', 'lat'), crs = 4326) %>%
     st_transform(5072)
   
-  d$d$drive_time <-(st_join(d$d, isochrones, largest = F) %>% 
+  d$d$drivetime_selected_center <-(st_join(d$d, isochrones, largest = F) %>% 
                     dplyr::distinct(.row, .keep_all = TRUE))$drive_time 
 
   # merge back on .row after unnesting .rows into .row
@@ -58,8 +59,8 @@ rdcrn_drivetime_selected_center <- function(filename, out_filename, selected_sit
   }
   
 
-  colnames(out)[which(colnames(out)=="drive_time")] <- paste0("drive_time_", selected_site)
-  write.csv(out,out_filename, na = "")
+  #colnames(out)[which(colnames(out)=="drive_time")] <- paste0("drive_time_", selected_site)
+  write.csv(out,out_filename,row.names = F, na = "")
   
   out
 
@@ -245,33 +246,34 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
 
 
 rdcrn_dep_idx <- function(filename, out_filename){
+  library(digest);library(dplyr);library(knitr);library(tidyr)
   
   dht::greeting()
   
-  ## load libraries without messages or warnings
-  withr::with_message_sink("/dev/null", library(dplyr))
-  withr::with_message_sink("/dev/null", library(tidyr))
-  withr::with_message_sink("/dev/null", library(sf))
+  ## load libraries without cats or warnings
+  # withr::with_message_sink("/dev/null", library(dplyr))
+  # withr::with_message_sink("/dev/null", library(tidyr))
+  # withr::with_message_sink("/dev/null", library(sf))
   
   
-  message("reading input file...")
+  cat("reading input file...\n")
   d <- dht::read_lat_lon_csv(filename, nest_df = T, sf = T, project_to_crs = 5072)
   
   dht::check_for_column(d$raw_data, "lat", d$raw_data$lat)
   dht::check_for_column(d$raw_data, "lon", d$raw_data$lon)
   
   ## add code here to calculate geomarkers
-  message("reading tract shapefile...")
+  cat("reading tract shapefile...\n")
   tracts10 <- readRDS('/opt/tracts_2010_sf_5072.rds')
   
-  message("joining to 2010 TIGER/Line+ census tracts using EPSG:5072 projection")
+  cat("joining to 2010 TIGER/Line+ census tracts using EPSG:5072 projection\n")
   d_tract <- st_join(d$d, tracts10) %>%
     st_drop_geometry()
   
-  message("reading deprivation index data...")
+  cat("reading deprivation index data...\n")
   dep_index18 <- readRDS('/opt/tract_dep_index_18.rds')
   
-  message("joining 2018 tract-level deprivation index")
+  cat("joining 2018 tract-level deprivation index\n")
   d_tract <- left_join(d_tract, dep_index18, by = c('fips_tract_id' = 'census_tract_fips'))
   d_tract <- rename(d_tract, census_tract_id = fips_tract_id)
   
@@ -327,7 +329,7 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
   
   isochrones <- readRDS(glue::glue(iso_filename))
   dx <- sapply(isochrones, function(x) {
-    message("isochrones -- match start")
+    cat("isochrones -- match start\n")
     # st_join(d$d, x, largest = TRUE)$value
     result = st_join(d$d, x, largest = F) %>%
       tidyr::unnest(.rows) %>%
@@ -335,7 +337,7 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
     
     
     result$drive_time
-    # this interferers with results -- message("isochrones -- match done")
+    # this interferers with results -- cat("isochrones -- match done")
   }) 
   
   
@@ -402,7 +404,7 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
   
   #modify file name
   #out_filename = sub("\\.csv", paste0("_",consortium, ".csv"), out_filename)
-  write.csv(output, file = out_filename,row.names = F)
+  write.csv(output, file = out_filename,row.names = F, na = "")
   
   # if (consortium == "ctsa"){
   return(list(output = output, d_to_pcgc_centers = d_to_centers))
@@ -414,28 +416,48 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
 
 rdcrn_run <- function(opt){
   # #browser()
+  out_filename = paste0(opt$output_prefix, ".csv")
+  phi_filename = paste0(opt$output_prefix, "-phi.csv")
+  deid_filename = paste0(opt$output_prefix, "-deid.csv")
   
+  #require(logr)
+
   if (is.null(opt$score_threshold)) opt$score_threshold <- 0.5
   d <- readr::read_csv(opt$filename, show_col_types = FALSE)
   
+
+  cat("Geocoding data...","\n")
+  
   # check if we have coordinates -- if not let's geocode first
   if (!"lat" %in% names(d) || !"lon" %in% names(d)) {
-    geocoded_df <- rdcrn_geocode(filename = opt$filename, score_threshold = opt$score_threshold, out_filename = opt$out_filename)
-    drivetime_input <- opt$out_filename
+    
+    geocoded_df <- rdcrn_geocode(filename = opt$filename, score_threshold = opt$score_threshold, out_filename = out_filename)
+    drivetime_input <- out_filename
   } else {
+    cat("Input data has already been geocoded. Skip geocoding","\n")
     drivetime_input <- opt$filename
   }
   
   
+  cat("\nComputing deprivation index:\n")
+  output_dep = rdcrn_dep_idx(drivetime_input, out_filename)
   
-  output_dep = rdcrn_dep_idx(drivetime_input, opt$out_filename)
+  write.csv(output_dep, file = out_filename,row.names = F, na = "")
+  
+  cat("\nFinished computing deprivation index\n")
+  
   
   selected_site <- opt$site
-  write.csv(output_dep, file = opt$out_filename,row.names = F)
+
+  cat(paste0("\nComputing distances to ", selected_site,":\n"))
+
+  rdcrn_drivetime_selected_center(out_filename, out_filename,selected_site) 
   
-  rdcrn_drivetime_selected_center(opt$out_filename, opt$out_filename,selected_site) 
+  cat(paste0("\nFinished computing distances to ", selected_site,"\n"))
   
-  output = rdcrn_drivetime(opt$out_filename, opt$out_filename,"pcgc")
+  
+  output = rdcrn_drivetime(out_filename, out_filename,"pcgc")$output %>%
+    dplyr::mutate(version = "geoocoder_PCGC_0.0.1")
   
   if(!is.null(opt$include_deid_fields)){
     field_list = unlist(strsplit(opt$include_deid_fields,","))
@@ -444,23 +466,30 @@ rdcrn_run <- function(opt){
     }else{
       field_list = opt$include_deid_fields
     }
-    output_deid = output %>% dplyr::select(field_list)
+    output_deid = output %>% dplyr::select(any_of(field_list))
   }
   
   phi_fields = c("id","address","matched_street",	"matched_zip","matched_city",	"matched_state","lat",
                  "lon", "census_tract_id")
-  output_phi = output %>% dplyr::select(phi_fields)
+  output_phi = output %>% dplyr::select(any_of(phi_fields))
   
   
-  write.csv(drivetime_input,opt$out_filename)
+  write.csv(output,out_filename,row.names = F, na = "")
+  write.csv(output_deid,deid_filename,row.names = F, na = "")
+  write.csv(output_phi,phi_filename,row.names = F, na = "")
   
+  
+    
+
   #return(list(output_df = output_pcgc_df, d_pcgc_list = d_pcgc_list, output_dep = output_dep))
   
   # if (opt$shiny){
-  #   output_pcgc = rdcrn_drivetime(opt$out_filename, opt$out_filename,"pcgc")
+  #   output_pcgc = rdcrn_drivetime(out_filename, out_filename,"pcgc")
   #   output_pcgc_df = output_pcgc$output
   #   d_pcgc_list = output_pcgc$d_to_pcgc_centers
   # 
   #   return(list(output_df = output_pcgc_df, d_pcgc_list = d_pcgc_list))
   # }
+  
+
 }
