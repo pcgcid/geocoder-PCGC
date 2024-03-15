@@ -38,7 +38,7 @@ rdcrn_drivetime_selected_center <- function(filename, out_filename, selected_sit
   cat('finding drive time for each point...\n')
   #d$d <- suppressWarnings( st_join(d$d, isochrones, largest = F) )
   
-  cat('finding distance (m) for each point...\n')
+  cat('finding drivetime (m) for each point...\n')
   
   centers <- centers %>% 
     filter(abbreviation == selected_site) %>% 
@@ -358,9 +358,9 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
   #print(sapply(1:nrow(df), function(i) as.numeric(df[i, mins[i]])))
   
   # Extract values using sapply
-  distance <- sapply(1:nrow(df), function(i) as.numeric(df[i, mins[i]]))
-  distance[rowSums(is.na(df)) == ncol(df)] <- NA
-  distance = distance %>% unlist()
+  drivetime <- sapply(1:nrow(df), function(i) as.numeric(df[i, mins[i]]))
+  drivetime[rowSums(is.na(df)) == ncol(df)] <- NA
+  drivetime = drivetime %>% unlist()
   
   not_found <- length(centers$abbreviation) + 1
   mins[is.na(mins == 0)] <- not_found
@@ -370,12 +370,12 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
   indexes <- unlist(d$d[[".rows"]])
   
   d$raw_data$nearest_center <- NA
-  d$raw_data$distance <- NA
+  d$raw_data$drivetime <- NA
   d$raw_data$d_to_centers <- NA
   
   
   d$raw_data$nearest_center[indexes] <- min_centers
-  d$raw_data$distance[indexes] <- distance
+  d$raw_data$drivetime[indexes] <- drivetime
   
   
   
@@ -397,9 +397,9 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
   #rename nearest_center column
   output <- output %>%     
     dplyr::rename_with(~ paste0(.x,"_", consortium, recycle0=T),
-                       all_of(c("nearest_center", "distance")))
+                       all_of(c("nearest_center", "drivetime")))
   # output <- output %>%
-  #   dplyr::rename(all_of(c("nearest_center", "distance"),
+  #   dplyr::rename(all_of(c("nearest_center", "drivetime"),
   #                        ~ paste0(.x,"_", consortium), .override = TRUE))
   
   #modify file name
@@ -416,14 +416,26 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
 
 rdcrn_run <- function(opt){
   # #browser()
-  out_filename = paste0(opt$output_prefix, ".csv")
-  phi_filename = paste0(opt$output_prefix, "-phi.csv")
+  out_filename = paste0(opt$output_prefix, "-with-phi.csv")
   deid_filename = paste0(opt$output_prefix, "-deid.csv")
   
   #require(logr)
 
   if (is.null(opt$score_threshold)) opt$score_threshold <- 0.5
   d <- readr::read_csv(opt$filename, show_col_types = FALSE)
+  
+  if (!"address_date" %in% colnames(d)){
+    cat("`address_date` is missing from data.\n`address_date` is recommended to record participant's address history.
+        \nCreating empty `address_date` column...",'\n')
+    d = d %>% mutate(address_date = NA) %>%
+      relocate(address_date, .before = address)
+
+    # Generate a temporary file path
+    temp_file <- tempfile(fileext = ".csv")
+    
+    write.csv(d,temp_file , row.names = F, na = "")
+    opt$filename = temp_file
+  }
   
 
   cat("Geocoding data...","\n")
@@ -438,7 +450,6 @@ rdcrn_run <- function(opt){
     drivetime_input <- opt$filename
   }
   
-  
   cat("\nComputing deprivation index:\n")
   output_dep = rdcrn_dep_idx(drivetime_input, out_filename)
   
@@ -449,11 +460,11 @@ rdcrn_run <- function(opt){
   
   selected_site <- opt$site
 
-  cat(paste0("\nComputing distances to ", selected_site,":\n"))
+  cat(paste0("\nComputing drivetimes to ", selected_site,":\n"))
 
   rdcrn_drivetime_selected_center(out_filename, out_filename,selected_site) 
   
-  cat(paste0("\nFinished computing distances to ", selected_site,"\n"))
+  cat(paste0("\nFinished computing drivetimes to ", selected_site,"\n"))
   
   
   output = rdcrn_drivetime(out_filename, out_filename,"pcgc")$output %>%
@@ -469,15 +480,11 @@ rdcrn_run <- function(opt){
     output_deid = output %>% dplyr::select(any_of(field_list))
   }
   
-  phi_fields = c("id","address","matched_street",	"matched_zip","matched_city",	"matched_state","lat",
-                 "lon", "census_tract_id")
-  output_phi = output %>% dplyr::select(any_of(phi_fields))
   
   
   write.csv(output,out_filename,row.names = F, na = "")
   write.csv(output_deid,deid_filename,row.names = F, na = "")
-  write.csv(output_phi,phi_filename,row.names = F, na = "")
-  
+
   
     
 
