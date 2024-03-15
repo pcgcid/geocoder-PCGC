@@ -29,7 +29,7 @@ doc <- "
                               Specify output prefix (it will generate output.log, output-phi.csv, output-deid.csv).
         -f --include-deid-fields <fields>
                               Specify list of fields to include in output.
-                              Dafault fields: 'id','date','precision','geocode_result','fraction_assisted_income','fraction_high_school_edu','median_income','fraction_no_health_ins','fraction_poverty','fraction_vacant_housing','dep_index','drivetime_selected_center','nearest_center_pcgc','distance_pcgc','version'
+                              Dafault fields: 'id','date','precision','geocode_result','fraction_assisted_income','fraction_high_school_edu','median_income','fraction_no_health_ins','fraction_poverty','fraction_vacant_housing','dep_index','drivetime_selected_center','nearest_center_pcgc','drivetime_pcgc','version'
 
       "
 opt <- docopt::docopt(doc)
@@ -41,9 +41,9 @@ output_prefix <- opt[["--output-file-prefix"]]
 include_deid_fields <- opt[["--include-deid-fields"]]
 
 if (is.null(include_deid_fields)){
-  include_deid_fields = c("id","date","precision","geocode_result","fraction_assisted_income",
+  include_deid_fields = c("id","date","matched_state","precision","geocode_result","fraction_assisted_income",
   "fraction_high_school_edu","median_income","fraction_no_health_ins","fraction_poverty","fraction_vacant_housing",
-  "dep_index","drivetime_selected_center","nearest_center_pcgc","distance_pcgc","version")
+  "dep_index","drivetime_selected_center","nearest_center_pcgc","drivetime_pcgc","version")
 }
 
 args_list = list(site = site, filename = input_file, output_prefix = output_prefix, score_threshold = 0.5, include_deid_fields = include_deid_fields)
