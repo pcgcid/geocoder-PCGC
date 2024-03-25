@@ -13,7 +13,7 @@ library(digest);library(dplyr);library(knitr);library(TeachingDemos)
 
 doc <- "
       Usage:
-        entrypoint.R [-h | --help] [-v | --version] [-i <filename> | --input-file <filename>] [-s <selected site> | --site <selected site>] [--site-list] [-o <output-file-prefix> | --output-file-prefix=<output-prefix>] [-f <fields> | --include-deid-fields=<fields>]
+        entrypoint.R [-h | --help] [-v | --version] [-i <filename> | --input-file <filename>] [-s <selected site> | --site <selected site>] [--site-list] [-o <output-prefix> | --output-file-prefix=<output-prefix>] [-f <fields> | --include-deid-fields=<fields>]
 
          
       Options:
@@ -25,8 +25,8 @@ doc <- "
         -s --site <selected site>
                               Specify site.
         --site-list           Print all available sites.
-        -o <out_filename> --output-file-prefix <out_filename>
-                              Specify output prefix (it will generate output.log, output-phi.csv, output-deid.csv).
+        -o <output-prefix> --output-file-prefix <output-prefix>
+                              Specify output prefix ( By default, the prefix is `output`, which will generate output.log, output-phi.csv, output-deid.csv).
         -f --include-deid-fields <fields>
                               Specify list of fields to include in output.
                               Dafault fields: 'id','date','precision','geocode_result','fraction_assisted_income','fraction_high_school_edu','median_income','fraction_no_health_ins','fraction_poverty','fraction_vacant_housing','dep_index','drivetime_selected_center','nearest_center_pcgc','drivetime_pcgc','version'
@@ -40,26 +40,17 @@ site <- opt[["--site"]]
 output_prefix <- opt[["--output-file-prefix"]]
 include_deid_fields <- opt[["--include-deid-fields"]]
 
-if (is.null(include_deid_fields)){
-  include_deid_fields = c("id","date","matched_state","precision","geocode_result","fraction_assisted_income",
-  "fraction_high_school_edu","median_income","fraction_no_health_ins","fraction_poverty","fraction_vacant_housing",
-  "dep_index","drivetime_selected_center","nearest_center_pcgc","drivetime_pcgc","version")
-}
 
 args_list = list(site = site, filename = input_file, output_prefix = output_prefix, score_threshold = 0.5, include_deid_fields = include_deid_fields)
 
+if (is.null(args_list$output_prefix)){output_prefix = 'output'}
 
 
 if (!is.null(args_list$filename) & !is.null(args_list$site)){
-  log_filename = paste0(output_prefix, "-log.txt")
+
+  result = rdcrn_run(args_list)
   
-  zz <- file(log_filename, open = "wt")
-  sink(zz, type = "output",split=TRUE)
-  sink(zz,type = "message")
-  rdcrn_run(args_list)
-  
-  sink(type = "output",split=TRUE)
-  sink(type = "message")
+
   
   # etxtStart(dir = ".", file =log_filename )
   # rdcrn_run(args_list)
@@ -87,4 +78,6 @@ if (opt[['--site-list']]) {
   cat(paste(centers_list, collapse = "\n"),"\n")
   q(status = 0)
 }
+
+
 

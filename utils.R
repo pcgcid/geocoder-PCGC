@@ -44,14 +44,16 @@ rdcrn_drivetime_selected_center <- function(filename, out_filename, selected_sit
     filter(abbreviation == selected_site) %>% 
     st_as_sf(coords = c('lon', 'lat'), crs = 4326) %>%
     st_transform(5072)
-  
+
+
   d$d$drivetime_selected_center <-(st_join(d$d, isochrones, largest = F) %>% 
                     dplyr::distinct(.row, .keep_all = TRUE))$drive_time 
 
   # merge back on .row after unnesting .rows into .row
   if (!is.null(d$raw_data)) {
+
     if ("sf" %in% class(d$d)) d$d <- sf::st_drop_geometry(d$d)
-    out <- dplyr::left_join(d$raw_data, d$d, by = ".row") %>% dplyr::select(-.row)
+    out <- dplyr::left_join(d$raw_data, d$d, by = ".row") %>% dplyr::select(-'.row')
   }
   
   if (is.null(d$raw_data)) {
@@ -89,7 +91,18 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
     d_for_geocoding <- d
   } else {
     d_excluded_for_address <- dplyr::filter(d, cincy_inst_foster_addr | po_box | non_address_text)
-    d_for_geocoding <- dplyr::filter(d, !cincy_inst_foster_addr & !po_box & !non_address_text)
+    if ('lat' %in% colnames(d) & 'lon' %in% colnames(d)){
+      d <- d %>%
+        dplyr::mutate(geocode_result = ifelse(!is.na(lat & lon),'geocoded_input', NA))
+    }
+    
+    d_for_geocoding <- d %>%
+      dplyr::filter(!cincy_inst_foster_addr & !po_box & !non_address_text)
+    
+    if ('lat' %in% colnames(d) & 'lon' %in% colnames(d)){    
+      d_for_geocoding <-d_for_geocoding %>%
+        dplyr::select(-c('lat','lon')) 
+    }
   }
   
   
@@ -305,13 +318,7 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
   
   centers_filename <- Sys.getenv("CENTERS_FILENAME", '/app/pcgc_isochrones.csv')
   output_filename <- Sys.getenv("OUTPUT_FILENAME", "/app/output.csv")
-  # }else if(consortium == "cegir"){  
-  #   iso_filename <- Sys.getenv("ISO_FILENAME", "/app/isochrones_cegir_no_overlap.rds")
-  # 
-  #   centers_filename <- Sys.getenv("CENTERS_FILENAME", '/app/CEGIRSites.csv')
-  #   output_filename <- Sys.getenv("OUTPUT_FILENAME", "/app/output.csv")
-  # }
-  # 
+
   centers <- readr::read_csv(centers_filename) 
   
   #rename CEGIR data columns so that it has similar structure to that of CTSA
@@ -323,7 +330,7 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
   centers = centers %>% arrange(abbreviation)
   
   d <- dht::read_lat_lon_csv(filename, nest_df = T, sf_out = T, project_to_crs = 5072)
-  d
+  
   d$d = d$d %>% dplyr::rename_with(., stringr::str_to_lower) 
   d$raw_data = d$raw_data %>% dplyr::rename_with(., stringr::str_to_lower) 
   
@@ -415,10 +422,18 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
 
 
 rdcrn_run <- function(opt){
+  if (is.null(opt$output_prefix)){opt$output_prefix = 'output'}
+  log_filename = paste0(output_prefix, "-log.txt")
+  
+
+  
   # #browser()
   out_filename = paste0(opt$output_prefix, "-with-phi.csv")
   deid_filename = paste0(opt$output_prefix, "-deid.csv")
-  
+
+  zz <- file(log_filename, open = "wt")
+  sink(zz, type = "output",split=TRUE)
+  sink(zz,type = "message")  
   #require(logr)
 
   if (is.null(opt$score_threshold)) opt$score_threshold <- 0.5
@@ -437,11 +452,18 @@ rdcrn_run <- function(opt){
     opt$filename = temp_file
   }
   
-
-  cat("Geocoding data...","\n")
   
+  cat("Geocoding data...","\n")
+  #if there are geocoded data with non-missing addresses in data with `lat` and `lon` columns, we still do the geocoding
+  if ("lat" %in% colnames(d) &"lon" %in% colnames(d)) {
+    d_lat_lon = d %>%
+      dplyr::filter(is.na(lat & lon) & !is.na(address))
+  
+   if (nrow(d_lat_lon) == 0){rm('d_lat_lon')}
+  }
+
   # check if we have coordinates -- if not let's geocode first
-  if (!"lat" %in% names(d) || !"lon" %in% names(d)) {
+  if (!"lat" %in% names(d) || !"lon" %in% names(d) || 'd_lat_lon' %in% ls()) {
     
     geocoded_df <- rdcrn_geocode(filename = opt$filename, score_threshold = opt$score_threshold, out_filename = out_filename)
     drivetime_input <- out_filename
@@ -450,9 +472,9 @@ rdcrn_run <- function(opt){
     drivetime_input <- opt$filename
   }
   
+  #Skip calculating deprivation index if testing
   cat("\nComputing deprivation index:\n")
   output_dep = rdcrn_dep_idx(drivetime_input, out_filename)
-  
   write.csv(output_dep, file = out_filename,row.names = F, na = "")
   
   cat("\nFinished computing deprivation index\n")
@@ -470,23 +492,36 @@ rdcrn_run <- function(opt){
   output = rdcrn_drivetime(out_filename, out_filename,"pcgc")$output %>%
     dplyr::mutate(version = "geoocoder_PCGC_0.0.1")
   
-  if(!is.null(opt$include_deid_fields)){
-    field_list = unlist(strsplit(opt$include_deid_fields,","))
-    if (length(opt$include_deid_fields) == 1 & length(field_list) > 1){
-      field_list = trimws(field_list)
-    }else{
-      field_list = opt$include_deid_fields
+  include_deid_fields = opt$include_deid_fields
+  if(is.null(include_deid_fields)){
+    include_deid_fields = c("id","date","matched_state","precision","geocode_result","fraction_assisted_income",
+                            "fraction_high_school_edu","median_income","fraction_no_health_ins","fraction_poverty","fraction_vacant_housing",
+                            "dep_index","drivetime_selected_center","nearest_center_pcgc","drivetime_pcgc","version")
+    field_list = include_deid_fields
+  }else{
+    field_list = unlist(strsplit(include_deid_fields,","))
+    
+    if (length(include_deid_fields) == 1 &  field_list > 1){
+        field_list = trimws(field_list)
     }
-    output_deid = output %>% dplyr::select(any_of(field_list))
   }
+  
+  
+   
+
+    
+  output_deid = output %>% dplyr::select(any_of(field_list))
+  
   
   
   
   write.csv(output,out_filename,row.names = F, na = "")
   write.csv(output_deid,deid_filename,row.names = F, na = "")
-
   
-    
+  sink(type = "output",split=TRUE)
+  sink(type = "message")
+
+
 
   #return(list(output_df = output_pcgc_df, d_pcgc_list = d_pcgc_list, output_dep = output_dep))
   
