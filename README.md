@@ -4,6 +4,27 @@
 <!-- [![container build status](https://github.com/degauss-org/geocoder/workflows/build-deploy-release/badge.svg)](https://github.com/degauss-org/geocoder/actions/workflows/build-deploy-release.yaml) -->
 
 ## Using
+### Preparation
+
+#### Step 0: Install Docker
+
+See the [Installing Docker](https://degauss.org/using_degauss.html#Installing_Docker) webpage.
+
+ > <font size="3.5"> **_Note about Docker Settings:_** </font> <br> <font size="2.75"> After installing Docker, but before running containers, go to **Docker Settings > Advanced** and change **memory** to greater than 4000 MB (or 4 GiB) <br> <center> <img width=75% src="figs/docker_settings_memory.PNG"> </center> <br> If you are using a Windows computer, also set **CPUs** to 1. <br> <center> <img width=75% src="figs/docker_settings_cpu.png"> </center> Click **Apply** and wait for Docker to restart. </font>
+
+
+#### Step 1: Preparing Your Input File
+
+The input file must be a CSV file with one column called `address` containing all address components. Other columns may be present and will be returned in the output file, but should be kept to a minimum to reduce file size.
+
+An example input CSV file (called `my_address_file.csv`) might look like:
+
+<center>![](figs/example_data.png)</center>
+
+
+
+Example address .csv files are [my_address_file.csv](tests/my_address_file.csv) or [address-sample.csv](tests/address-sample.csv)
+
 
 ### Usage
 If `my_address_file.csv` is a file in the current working directory with an address column named `address`, then the [DeGAUSS command](https://degauss.org/using_degauss.html#DeGAUSS_Commands):
