@@ -165,7 +165,7 @@ This container uses isochrones to assign drive time to care center for each inpu
 
 Drive time isochrones were obtained from [openroute service](https://maps.openrouteservice.org/reach?n1=38.393339&n2=-95.339355&n3=5&b=0&i=0&j1=30&j2=15&k1=en-US&k2=km).
 
-Drive time is computed based on Euclidean distance between input address and care center:
+Drive time is computed based on distance between input address and care center:
 <center>drive_time = distance/60</center>
 
 There are  24 levels of isochrones:  15  30  45  60  75  90  105 120 135 150 165 180 195 210 225 240 300 360 420 480 600 720 840 960
