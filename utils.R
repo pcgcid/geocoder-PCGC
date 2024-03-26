@@ -437,7 +437,13 @@ rdcrn_run <- function(opt){
   #require(logr)
 
   if (is.null(opt$score_threshold)) opt$score_threshold <- 0.5
-  d <- readr::read_csv(opt$filename, show_col_types = FALSE)
+  tryCatch({
+    d <- read.csv(opt$filename)
+    
+  },error = function(e){
+    cat("Please check input file.\nPlease make sure to enclose the address information in quotation marks (e.g., “) if it contains commas.\n")
+    stop()
+  })
   
   if (!"address_date" %in% colnames(d)){
     cat("`address_date` is missing from data.\n`address_date` is recommended to record participant's address history.
