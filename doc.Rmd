@@ -45,13 +45,19 @@ After installing Docker, but before running containers, go to **Docker Settings 
 
 ## Step 1: Preparing Your Input File
 
-The input file must be a CSV file with a column titled `address` containing all address components. Other columns may be present - in particular a participant ID column and a date column are recommended. The software will ignore (but preserve) all additional columns besides `address`.
+The input file must be a CSV file with either a column titled `address` containing all address components or columns titled `lat` and `lon` with the participant's latitude and longitude, respectively. Other columns may be present - in particular a participant ID column and a date column are recommended. However, the software will ignore (but preserve) all additional columns besides `address`, `lat` and `lon`.
 
-An example input CSV file (called `my_address_file.csv`) might look like:
+An example input CSV file might look like:
 
-<center>![](figs/example_data.png)</center>
+\begin{center}
+\includegraphics[width=0.75\textwidth]{figs/example_data.png}
+\end{center}
 
-Example address .csv files are [my_address_file.csv](tests/my_address_file.csv) or [address-sample.csv](tests/address-sample.csv)
+
+Example address .csv files are [my_address_file.csv](tests/my_address_file.csv), [address-sample.csv](tests/address-sample.csv) or [address-sample-date-UTAH.csv](tests/address-sample-date-UTAH.csv)
+
+**_Note_**: Please make sure to enclose the address information in quotation marks (e.g., "") if it contains commas.
+
 
 
 ## Step 2: Running the PCGC deGAUSS container (the short version)
@@ -78,7 +84,7 @@ will produce 3 output files:
 - `UTAH_output-deid.csv`: This file contains de-identified fields specified by user. By default, de-identified fields are "id","date","matched_state","precision","geocode_result","fraction_assisted_income", "fraction_high_school_edu","median_income","fraction_no_health_ins","fraction_poverty","fraction_vacant_housing", "dep_index","drivetime_selected_center","nearest_center_pcgc","drivetime_pcgc","version"
 - `UTAH_output-log.txt`: This file is an output log
 
-Note: The example above uses `PCGC_UTAH` for PCGC center in Utah. To change the care center, replace `PCGC_UTAH` with one of the site abbrevations below. 
+**_Note_**: The example above uses `PCGC_UTAH` for PCGC center in Utah. To change the care center, replace `PCGC_UTAH` with one of the site abbrevations below. 
 
 | **Abbreviation** |  **Name** |
 |--------------------|-------------------|
@@ -229,8 +235,8 @@ This container uses isochrones to assign drive time to care center for each inpu
 
 Drive time isochrones were obtained using [self-hosted openroute service](https://maps.openrouteservice.org/reach?n1=38.393339&n2=-95.339355&n3=5&b=0&i=0&j1=30&j2=15&k1=en-US&k2=km) in order to overcome the time limitations of publicly available API.
 
-Drive time is computed based on distance between input address and care center:
-<center>drive_time = distance/60</center>
+<!-- Drive time is computed based on distance between input address and care center: -->
+<!-- <center>drive_time = distance/60</center> -->
 
 There are  24 levels of isochrones with driving distances up to 960 (in minutes): :  15  30  45  60  75  90  105 120 135 150 165 180 195 210 225 240 300 360 420 480 600 720 840 960
 
