@@ -10,7 +10,8 @@
 
 See the [Installing Docker](https://degauss.org/using_degauss.html#Installing_Docker) webpage.
 
- > <font size="3.5"> **_Note about Docker Settings:_** </font> <br> <font size="2.75"> After installing Docker, but before running containers, go to **Docker Settings > Advanced** and change **memory** to greater than 4000 MB (or 4 GiB) <br> <center> <img width=75% src="figs/docker_settings_memory.PNG"> </center> <br> If you are using a Windows computer, also set **CPUs** to 1. <br> <center> <img width=75% src="figs/docker_settings_cpu.png"> </center> Click **Apply** and wait for Docker to restart. </font>
+ > <font size="3.5"> **_Note about Docker Settings:_** </font> <br> <font size="2.75"> After installing Docker, but before running containers, go to **Docker Settings > Advanced** and change **memory** to greater than 4000 MB (or 4 GiB) <br> <center> <img width=75% src="figs/docker_settings_memory.png"> </center> <br> If you are using a Windows computer, also set **CPUs** to 1. <br> <center> <img width=75% src="figs/docker_settings_cpu.png">
+</center> Click **Apply** and wait for Docker to restart. </font>
 
 
 #### Step 1: Preparing Your Input File
