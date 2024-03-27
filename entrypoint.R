@@ -18,10 +18,10 @@ doc <- "
          
       Options:
         -h --help             Show available parameters.
-        --shiny               Start shiny server on port 3838.
         -v --version          Show version.
         -i --input-file <filename>
                               Specify input csv file.
+        --force               Overwrite existing files if they exist.
         -s --site <selected site>
                               Specify site.
         --site-list           Print all available sites.
@@ -30,7 +30,7 @@ doc <- "
         -f --include-deid-fields <fields>
                               Specify list of fields to include in output.
                               Dafault fields: 'id','date','precision','geocode_result','fraction_assisted_income','fraction_high_school_edu','median_income','fraction_no_health_ins','fraction_poverty','fraction_vacant_housing','dep_index','drivetime_selected_center','nearest_center_pcgc','drivetime_pcgc','version'
-        --force               Use `--force` argument to force the program to overwrite output files if they already exist
+        
 
       "
 opt <- docopt::docopt(doc)
@@ -85,9 +85,6 @@ if (!is.null(args_list$filename) & !is.null(args_list$site)){
   # writeLines(capture.output(rdcrn_run(args_list)),  log_filename)
   }
 
-if (opt$shiny) {
-  shiny::runApp(appDir="/app",host='0.0.0.0',port=3838)
-}
 
 # Handle version option
 if (opt$version | opt$ver) {
