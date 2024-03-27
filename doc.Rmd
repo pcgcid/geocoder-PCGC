@@ -172,7 +172,6 @@ This Docker image does the following:
     + `geocoded`: the address was geocoded with a `precision` of either `range` or `street` and a `score` of `0.5` or greater.
     + `imprecise_geocode`: the address was geocoded, but results were suppressed because the `precision` was `intersection`, `zip`, or `city` and/or the `score` was less than `0.5`.
     + `po_box`: the address was not geocoded because it is a PO Box
-    + `cincy_inst_foster_addr`: the address was not geocoded because it is a known institutional address, not a residential address
     + `non_address_text`: the address was not geocoded because it was blank or listed as "foreign", "verify", or "unknown" 
     
     

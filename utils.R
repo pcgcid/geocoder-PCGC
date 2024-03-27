@@ -83,21 +83,20 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
   ## clean up addresses / classify 'bad' addresses
   d$address <- dht::clean_address(d$address)
   d$po_box <- dht::address_is_po_box(d$address)
-  d$cincy_inst_foster_addr <- dht::address_is_institutional(d$address)
   d$non_address_text <- dht::address_is_nonaddress(d$address)
   
   ## exclude 'bad' addresses from geocoding (unless specified to return all geocodes)
   if (score_threshold == "all") {
     d_for_geocoding <- d
   } else {
-    d_excluded_for_address <- dplyr::filter(d, cincy_inst_foster_addr | po_box | non_address_text)
+    d_excluded_for_address <- dplyr::filter(d, po_box | non_address_text)
     if ('lat' %in% colnames(d) & 'lon' %in% colnames(d)){
       d <- d %>%
         dplyr::mutate(geocode_result = ifelse(!is.na(lat & lon),'geocoded_input', NA))
     }
     
     d_for_geocoding <- d %>%
-      dplyr::filter(!cincy_inst_foster_addr & !po_box & !non_address_text)
+      dplyr::filter( !po_box & !non_address_text)
     
     if ('lat' %in% colnames(d) & 'lon' %in% colnames(d)){    
       d_for_geocoding <-d_for_geocoding %>%
@@ -184,7 +183,6 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
       dplyr::mutate(
         geocode_result = dplyr::case_when(
           po_box ~ "po_box",
-          cincy_inst_foster_addr ~ "cincy_inst_foster_addr",
           non_address_text ~ "non_address_text",
           (!precision %in% c("street", "range")) ~ "imprecise_geocode",
           TRUE ~ "geocoded"
@@ -193,14 +191,13 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
         # lat = ifelse(geocode_result != "geocoded", NA, lat),
         # lon = ifelse(geocode_result != "geocoded", NA, lon)
       ) %>%
-      select(-po_box, -cincy_inst_foster_addr, -non_address_text) # note, just "PO" not "PO BOX" is not flagged as "po_box"
+      select(-po_box, -non_address_text) # note, just "PO" not "PO BOX" is not flagged as "po_box"
     
   } else {
     out_file <- dplyr::bind_rows(d_excluded_for_address, d_for_geocoding) %>%
       dplyr::mutate(
         geocode_result = dplyr::case_when(
           po_box ~ "po_box",
-          cincy_inst_foster_addr ~ "cincy_inst_foster_addr",
           non_address_text ~ "non_address_text",
           (!precision %in% c("street", "range")) | (score < score_threshold) ~ "imprecise_geocode",
           TRUE ~ "geocoded"
@@ -208,7 +205,7 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
         lat = ifelse(geocode_result == "imprecise_geocode", NA, lat),
         lon = ifelse(geocode_result == "imprecise_geocode", NA, lon)
       ) %>%
-      select(-po_box, -cincy_inst_foster_addr, -non_address_text) # note, just "PO" not "PO BOX" is not flagged as "po_box"
+      select(-po_box, -non_address_text) # note, just "PO" not "PO BOX" is not flagged as "po_box"
   }
   
   ## write out file
@@ -233,7 +230,7 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
     geocode_summary <- out_file %>%
       mutate(geocode_result = factor(geocode_result,
                                      levels = c(
-                                       "po_box", "cincy_inst_foster_addr", "non_address_text",
+                                       "po_box", "non_address_text",
                                        "imprecise_geocode", "geocoded"
                                      ),
                                      ordered = TRUE
