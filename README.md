@@ -31,7 +31,7 @@ Example address .csv files are [my_address_file.csv](tests/my_address_file.csv) 
 If `my_address_file.csv` is a file in the current working directory with an address column named `address`, then the [DeGAUSS command](https://degauss.org/using_degauss.html#DeGAUSS_Commands):
 
 ```sh
-docker run --rm -v $PWD:/tmp ghcr.io/dohn5r/geocoder_pcgc:0.0.1 -s PCGC_UTAH -i /tmp/address-sample.csv -o output -f "id,date,precision,geocode_result,census_tract_id,fraction_assisted_income,fraction_high_school_edu,median_income,fraction_no_health_ins,fraction_poverty,fraction_vacant_housing,dep_index,drivetime_selected_center,nearest_center_pcgc,distance_pcgc,version"
+docker run --rm -v $PWD:/tmp ghcr.io/pcgcid/geocoder_pcgc:0.0.1 -s PCGC_UTAH -i /tmp/address-sample.csv -o output -f "id,date,precision,geocode_result,census_tract_id,fraction_assisted_income,fraction_high_school_edu,median_income,fraction_no_health_ins,fraction_poverty,fraction_vacant_housing,dep_index,drivetime_selected_center,nearest_center_pcgc,distance_pcgc,version"
  ```
 
 will produce 3 output files:
@@ -47,25 +47,25 @@ There are useful commands for users
 - `-h` or `--help`: Show available parameters. For example, users can use this command:
 
   ```sh
-  docker run ghcr.io/dohn5r/geocoder_pcgc:0.0.1 -h
+  docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 -h
   ```
 or 
   ```sh
-  docker run ghcr.io/dohn5r/geocoder_pcgc:0.0.1 --help
+  docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 --help
   ```
 
 - `-v` or `--version`: Show the current version of Docker container with this command:
   ```sh
-  docker run ghcr.io/dohn5r/geocoder_pcgc:0.0.1 -v
+  docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 -v
   ```
   or 
   ```sh
-  docker run ghcr.io/dohn5r/geocoder_pcgc:0.0.1 --version
+  docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 --version
   ```
 
 - `--site-list`: SPrint all available sites with this command:
   ```sh
-  docker run ghcr.io/dohn5r/geocoder_pcgc:0.0.1 --site-list
+  docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 --site-list
   ```
 
 
@@ -98,6 +98,7 @@ This DeGAUSS container has the following optional arguments:
 -   `-o` or `--output-file-prefix` to specify prefix of output files. By default, the prefix is `output`, which will generate output.log, output-phi.csv, output-deid.csv
 -   `--f` or `--include-deid-fields` to specify list of fields to include in output. Dafault fields:
     - id, date, precision, geocode_result, fraction_assisted_income, fraction_high_school_edu, median_income, fraction_no_health_ins, fraction_poverty, fraction_vacant_housing, dep_index, drivetime_selected_center, nearest_center_pcgc, drivetime_pcgc, version
+-   `--force` to force the container to overwrite output files if one of the output files already exists. By default, the program would exit if one of the output files already exists
 
 ### Workflow
 This Docker image does the following:
