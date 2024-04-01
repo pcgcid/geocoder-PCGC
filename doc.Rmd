@@ -252,3 +252,5 @@ We defined 24 levels of isochrones with driving distances up to 960 minutes (16 
 
 
 ## DeGAUSS Details
+
+ For detailed documentation on DeGAUSS, including general usage and installation, please see the [DeGAUSS homepage](https://degauss.org).
