@@ -317,12 +317,7 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
   output_filename <- Sys.getenv("OUTPUT_FILENAME", "/app/output.csv")
 
   centers <- readr::read_csv(centers_filename) 
-  
-  #rename CEGIR data columns so that it has similar structure to that of CTSA
-  if(consortium == "cegir"){  
-    colnames(centers) <- c("abbreviation", "consortium" ,"name","address","city","state","country",
-                           "zipcode","website_url","geometry","lat","lon")
-  }
+
   
   centers = centers %>% arrange(abbreviation)
   
