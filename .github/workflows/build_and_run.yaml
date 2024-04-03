@@ -5,26 +5,26 @@ name: Docker
  # separate terms of service, privacy policy, and support
  # documentation.
 
- on:
-   workflow_dispatch:
+on:
+  workflow_dispatch:
 
-   schedule:
+  schedule:
      - cron: '37 14 * * *'
-   push:
+  push:
      branches: [ "main" ]
      # Publish semver tags as releases.
      tags: [ 'v*.*.*' ]
-   pull_request:
+  pull_request:
      branches: [ "main" ]
 
- env:
+env:
    # Use docker.io for Docker Hub if empty
    REGISTRY: ghcr.io
    # github.repository as <account>/<repo>
    IMAGE_NAME: ${{ github.repository }}
 
 
- jobs:
+jobs:
    build:
 
      runs-on: ubuntu-latest
