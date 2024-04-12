@@ -1,9 +1,19 @@
-on:
-  push:
-    paths:
-      - docs/doc.Rmd
+name: Render Rmarkdown
 
-name: Render my document
+on:
+  workflow_dispatch:
+
+  schedule:
+     - cron: '37 14 * * *'
+  push:
+     branches: [ "main" ]
+     paths:
+        - docs/doc.Rmd
+     # Publish semver tags as releases.
+     tags: [ 'v*.*.*' ]
+  pull_request:
+     branches: [ "main" ]
+
 
 jobs:
   render:
