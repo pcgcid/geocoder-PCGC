@@ -1,5 +1,5 @@
 <center><h1>PCGC Social Determinants of Health and Geocoding Manual</h1></center>
-<center><h3>March 27, 2024</h3></center>
+<center><h3>April 11, 2024</h3></center>
 <!-- # geocoder <a href='https://degauss.org'><img src='https://github.com/degauss-org/degauss_hex_logo/raw/main/PNG/degauss_hex.png' align='right' height='138.5' /></a> -->
 
 <!-- [![](https://img.shields.io/github/v/release/degauss-org/geocoder?color=469FC2&label=version&sort=semver)](https://github.com/degauss-org/geocoder/releases) -->
@@ -60,7 +60,7 @@ If `my_address_file.csv` is an address file in the current working directory wit
   - Windows (CMD):
   
     ```sh
-    docker run --rm -v "%cd%":/tmp ghcr.io/pcgcid/geocoder_pcgc:0.0.1 \
+    docker run --rm -v "%cd%":/tmp ghcr.io/pcgcid/geocoder_pcgc:0.0.1 ^
     -s PCGC_UTAH -i my_address-file.csv -o UTAH_output 
     ```
 
@@ -81,6 +81,8 @@ PCGC_COLUMBIA | `Columbia`
 PCGC_CHOP | `CHOP`
 PCGC_UTAH | `Utah`
 PCGC_CHLA | `Childrens of LA`
+
+**_Note_**: On Windows computers you may need to give Docker explicit permissions to access the folder containing the address file (and possibly restart the Docker daemon after you have done so). Please check the Docker documentation for details.
 
 **_Note_**: The first time this process is run, docker will download the latest container from the ACC, which takes a few minutes of time. Later runs will not require internet connections (unless the container is to be updated with the latest version).
 
