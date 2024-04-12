@@ -27,7 +27,7 @@ jobs:
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
       - name: Render my document to all types
-        run: Rscript -e 'rmarkdown::render("docs/doc.Rmd", output_format = "all")'
+        run: Rscript -e 'rmarkdown::render("docs/doc.Rmd", output_format = "pdf")'
       - name: Commit results
         run: |
           git add docs/doc*
