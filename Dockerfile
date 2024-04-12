@@ -100,10 +100,6 @@ WORKDIR /tmp
 
 ENTRYPOINT ["/app/entrypoint.R"]
 
-
-
-#CMD ["R", "-e", "shiny::runApp('/app',host='0.0.0.0',port = 3838)"]
-
 # Expose port 3838
 EXPOSE 3838
 #CMD ["/bin/bash"]
