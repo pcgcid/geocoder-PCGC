@@ -1,0 +1,25 @@
+on:
+  push:
+    paths:
+      - docs/doc.Rmd
+
+name: Render my document
+
+jobs:
+  render:
+    name: Render my document
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: r-lib/actions/setup-r@v1
+      - uses: r-lib/actions/setup-pandoc@v1
+      - uses: r-lib/actions/setup-tinytex@v1
+      - name: Install rmarkdown
+        run: Rscript -e 'install.packages("rmarkdown")'
+      - name: Render my document to all types
+        run: Rscript -e 'rmarkdown::render("docs/doc.Rmd", output_format = "all")'
+      - name: Commit results
+        run: |
+          git add docs/doc*
+          git commit -m 'Re-build my-document' || echo "No changes to commit"
+          git push origin || echo "No changes to commit"
