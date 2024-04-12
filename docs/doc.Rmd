@@ -44,12 +44,12 @@ See the [Installing Docker](https://degauss.org/using_degauss.html#Installing_Do
 After installing Docker, but before running containers, go to **Docker Settings > Advanced** and change **memory** to greater than 4000 MB (or 4 GiB) <br> 
 
 \begin{center}
-\includegraphics[width=0.75\textwidth]{figs/docker_settings_memory.PNG}
+\includegraphics[width=0.75\textwidth]{../figs/docker_settings_memory.png}
 \end{center}
 
-<!-- <center> ![](figs/docker_settings_memory.PNG) </center> -->
+<!-- <center> ![](../figs/docker_settings_memory.PNG) </center> -->
 <br> If you are using a Windows computer, also set **CPUs** to 1. <br>
-<!-- <center> ![](figs/docker_settings_cpu.png) </center> Click **Apply** and wait for Docker to restart. -->
+<!-- <center> ![](../figs/docker_settings_cpu.png) </center> Click **Apply** and wait for Docker to restart. -->
 
 ## Step 1: Preparing Your Address File
 
@@ -58,7 +58,7 @@ The address file must be a CSV file with either a column titled `address` contai
 An example address CSV file might look like the following `address-sample-date-UTAH.csv` file from the docker container:
 
 \begin{center}
-\includegraphics[width=0.75\textwidth]{figs/example_data.png}
+\includegraphics[width=0.75\textwidth]{../figs/example_data.png}
 \end{center}
 
 
@@ -82,7 +82,7 @@ If `my_address_file.csv` is an address file in the current working directory wit
   - Windows (CMD):
   
     ```sh
-    docker run --rm -v "%cd%":/tmp ghcr.io/pcgcid/geocoder_pcgc:0.0.1 \
+    docker run --rm -v "%cd%":/tmp ghcr.io/pcgcid/geocoder_pcgc:0.0.1 ^
     -s PCGC_UTAH -i my_address-file.csv -o UTAH_output 
     ```
 
@@ -103,6 +103,16 @@ PCGC_COLUMBIA | `Columbia`
 PCGC_CHOP | `CHOP`
 PCGC_UTAH | `Utah`
 PCGC_CHLA | `Childrens of LA`
+
+**_Note_**: On Windows computers you may need to give Docker explicit permissions to access the folder containing the address file (and possibly restart the Docker daemon after you have done so). 
+\begin{center}
+\includegraphics[width=0.5\textwidth]{../figs/Windows_permission.png}
+\end{center}
+
+However, if notifications are disabled, the confirmation box will not appear and Docker will automatically decline the permission. In that case, go to **Docker Settings > Resources > FileSharing**. Add required folder and hit Apply & Restart
+
+![](../figs/Docker_Resources_settings.png)
+
 
 **_Note_**: The first time this process is run, docker will download the latest container from the ACC, which takes a few minutes of time. Later runs will not require internet connections (unless the container is to be updated with the latest version).
 
@@ -234,7 +244,7 @@ For more information on the deprivation index, please see the [deprivation index
 
 This container uses isochrones to assign drive time to care center for each input address. Drive time isochrones are concentric polygons, in which each point inside a polygon has (roughly) the same drive time to the care center. Below is an example of drive time isochrones around the PCGC center in Utah
 
-![](figs/PCGC_UTAH_isochrones_fig.png)
+![](../figs/PCGC_UTAH_isochrones_fig.png)
 
 Drive time isochrones were obtained using a [self-hosted openroute service](https://maps.openrouteservice.org/reach?n1=38.393339&n2=-95.339355&n3=5&b=0&i=0&j1=30&j2=15&k1=en-US&k2=km) in order to overcome the time limitations of the publicly available API.
 
