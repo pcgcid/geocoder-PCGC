@@ -60,7 +60,7 @@ If `my_address_file.csv` is an address file in the current working directory wit
   - Windows (CMD):
   
     ```sh
-    docker run --rm -v "%cd%":/tmp ghcr.io/pcgcid/geocoder_pcgc:0.0.1 \
+    docker run --rm -v "%cd%":/tmp ghcr.io/pcgcid/geocoder_pcgc:0.0.1 ^
     -s PCGC_UTAH -i my_address-file.csv -o UTAH_output 
     ```
 
@@ -81,6 +81,8 @@ PCGC_COLUMBIA | `Columbia`
 PCGC_CHOP | `CHOP`
 PCGC_UTAH | `Utah`
 PCGC_CHLA | `Childrens of LA`
+
+**_Note_**: On Windows computers you may need to give Docker explicit permissions to access the folder containing the address file (and possibly restart the Docker daemon after you have done so). Please check the Docker documentation for details.
 
 **_Note_**: The first time this process is run, docker will download the latest container from the ACC, which takes a few minutes of time. Later runs will not require internet connections (unless the container is to be updated with the latest version).
 
