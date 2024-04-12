@@ -1,0 +1,41 @@
+name: Render Rmarkdown
+
+on:
+  workflow_dispatch:
+
+  schedule:
+     - cron: '37 14 * * *'
+  push:
+     branches: [ "main" ]
+     paths:
+        - docs/doc.Rmd
+     # Publish semver tags as releases.
+     tags: [ 'v*.*.*' ]
+  pull_request:
+     branches: [ "main" ]
+
+
+jobs:
+  render:
+    name: Render my document
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-tinytex@v2
+      - name: Install rmarkdown
+        run: Rscript -e 'install.packages("rmarkdown")'
+      - name: Install tidyverse
+        run: Rscript -e 'install.packages("tidyverse")'      
+      - name: Install dplyr
+        run: Rscript -e 'install.packages("dplyr")' 
+      - name: Install kableExtra
+        run: Rscript -e 'install.packages("kableExtra")' 
+      - name: Render my document to all types
+        run: Rscript -e 'rmarkdown::render("docs/doc.Rmd", output_format = "pdf_document")'
+      - name: Commit results
+        run: |
+          git add docs/doc*
+          git commit -m 'Re-build my-document' || echo "No changes to commit"
+          git push origin || echo "No changes to commit"
