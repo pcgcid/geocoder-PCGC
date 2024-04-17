@@ -40,7 +40,6 @@ jobs:
       - name: Commit results
         if: steps.git_changes.outputs.changed != ''
         run: |
-          git fetch origin main
           git add docs/doc*
           git commit -m 'Re-build my-document' || echo "No changes to commit"
           git push origin || echo "No changes to commit"
