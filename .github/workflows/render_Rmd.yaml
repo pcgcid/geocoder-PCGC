@@ -8,12 +8,11 @@ on:
   push:
      branches: [ "main" ]
      paths:
-        - docs/doc.Rmd
+        - 'docs/doc.Rmd'
      # Publish semver tags as releases.
      tags: [ 'v*.*.*' ]
   pull_request:
      branches: [ "main" ]
-
 
 jobs:
   render:
@@ -34,6 +33,9 @@ jobs:
         run: Rscript -e 'install.packages("kableExtra")' 
       - name: Render my document to all types
         run: Rscript -e 'rmarkdown::render("docs/doc.Rmd", output_format = "pdf_document")'
+      - name: Check for changes
+        id: git_changes
+        run: echo "::set-output name=changed::$(git status --porcelain)"
       - name: Commit results
         run: |
           git add docs/doc*
