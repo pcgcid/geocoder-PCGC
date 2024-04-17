@@ -2,18 +2,14 @@ name: Render Rmarkdown
 
 on:
   workflow_dispatch:
-
-  schedule:
-     - cron: '37 14 * * *'
   push:
      branches: [ "main" ]
      paths:
-        - docs/doc.Rmd
+        - 'docs/doc.Rmd'
      # Publish semver tags as releases.
      tags: [ 'v*.*.*' ]
   pull_request:
      branches: [ "main" ]
-
 
 jobs:
   render:
@@ -34,9 +30,11 @@ jobs:
         run: Rscript -e 'install.packages("kableExtra")' 
       - name: Render my document to all types
         run: Rscript -e 'rmarkdown::render("docs/doc.Rmd", output_format = "pdf_document")'
+      - name: Check for changes
+        id: git_changes
+        run: echo "::set-output name=changed::$(git status --porcelain)"
       - name: Commit results
         run: |
-          git fetch origin main
           git add docs/doc*
           git commit -m 'Re-build my-document' || echo "No changes to commit"
           git push origin || echo "No changes to commit"
