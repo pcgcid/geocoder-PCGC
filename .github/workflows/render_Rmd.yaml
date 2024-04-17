@@ -36,6 +36,7 @@ jobs:
         run: Rscript -e 'rmarkdown::render("docs/doc.Rmd", output_format = "pdf_document")'
       - name: Commit results
         run: |
+          git fetch origin main
           git add docs/doc*
           git commit -m 'Re-build my-document' || echo "No changes to commit"
           git push origin || echo "No changes to commit"
