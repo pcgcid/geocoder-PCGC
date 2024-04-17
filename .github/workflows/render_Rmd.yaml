@@ -14,7 +14,6 @@ on:
   pull_request:
      branches: [ "main" ]
 
-
 jobs:
   render:
     name: Render my document
@@ -38,7 +37,6 @@ jobs:
         id: git_changes
         run: echo "::set-output name=changed::$(git status --porcelain)"
       - name: Commit results
-        if: steps.git_changes.outputs.changed != ''
         run: |
           git add docs/doc*
           git commit -m 'Re-build my-document' || echo "No changes to commit"
