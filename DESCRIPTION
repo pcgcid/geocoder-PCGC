@@ -1,0 +1,24 @@
+Type: project
+Title: geocoder PCGC
+Version: 0.0.1
+Depends:
+    rlang,
+    magrittr,
+    chron,
+    dplyr,
+    ggplot2,
+    lubridate,
+    purrr,
+    readr,
+    rmarkdown,
+    tibble,
+    tidyr,
+    zoo,
+    kableExtra,
+    devtools,
+    usethis,
+    ggnewscale,
+    tidyverse,
+    sf
+Config/testthat/edition: 3
+RoxygenNote: 7.3.1.9000
