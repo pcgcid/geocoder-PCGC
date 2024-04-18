@@ -16,10 +16,16 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v2
         with:
             r-version: ${{ matrix.config.r }}
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
+      - name: Install rmarkdown
+        run: Rscript -e 'install.packages("rmarkdown")'
+      - name: Install tidyverse
+        run: Rscript -e 'install.packages("tidyverse")'      
+      - name: Install dplyr
+        run: Rscript -e 'install.packages("dplyr")' 
+      - name: Install kableExtra
+        run: Rscript -e 'install.packages("kableExtra")' 
+      - name: Install any::rcmdcheck
+        run: Rscript -e 'install.packages("any::rcmdcheck")'  
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
