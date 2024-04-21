@@ -31,5 +31,5 @@ jobs:
       - name: Install testthat
         run: Rscript -e 'install.packages("testthat")'  
       - name: Run testthat
-        run: Rscript -e 'testthat::test_file(paste0(getwd(),"/tests*/testthat/test_docker.R"))'  
+        run: Rscript -e 'testthat::test_file(paste0(getwd(),"/tests/testthat/test_docker.R"))'  
     
