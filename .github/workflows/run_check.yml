@@ -30,8 +30,6 @@ jobs:
         run: Rscript -e 'install.packages("kableExtra")' 
       - name: Install testthat
         run: Rscript -e 'install.packages("testthat")'  
-      - name: Get current directory
-        run: Rscript -e 'getwd()' 
       - name: Run testthat
-        run: Rscript -e 'testthat::test_file("/**/tests*/testthat/test_docker.R")'  
+        run: Rscript -e 'testthat::test_file(paste0(getwd(),"/tests*/testthat/test_docker.R"))'  
     
