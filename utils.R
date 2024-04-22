@@ -492,7 +492,7 @@ rdcrn_run <- function(opt){
   
   include_deid_fields = opt$include_deid_fields
   if(is.null(include_deid_fields)){
-    include_deid_fields = c("id","date","matched_state","precision","geocode_result","fraction_assisted_income",
+    include_deid_fields = c("id","address_date","matched_state","precision","geocode_result","fraction_assisted_income",
                             "fraction_high_school_edu","median_income","fraction_no_health_ins","fraction_poverty","fraction_vacant_housing",
                             "dep_index","drivetime_selected_center","nearest_center_pcgc","drivetime_pcgc","version")
     field_list = include_deid_fields
