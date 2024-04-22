@@ -21,6 +21,10 @@ jobs:
         with:
             r-version: ${{ matrix.config.r }}
 
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
       - uses: docker-practice/actions-setup-docker@master
       - run: |
             set -x
