@@ -20,6 +20,11 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v2
         with:
             r-version: ${{ matrix.config.r }}
+
+      - uses: docker-practice/actions-setup-docker@master
+      - run: |
+            set -x
+            docker version
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
       - name: Install tidyverse
@@ -30,8 +35,6 @@ jobs:
         run: Rscript -e 'install.packages("kableExtra")' 
       - name: Install testthat
         run: Rscript -e 'install.packages("testthat")'  
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
       - name: Run testthat
         run: Rscript -e 'testthat::test_file(paste0(getwd(),"/tests/testthat/test_docker.R"))'  
     
