@@ -29,7 +29,7 @@ doc <- "
                               Specify output prefix ( By default, the prefix is `output`, which will generate output.log, output-phi.csv, output-deid.csv).
         -f --include-deid-fields <fields>
                               Specify list of fields to include in output.
-                              Dafault fields: 'id','date','precision','geocode_result','fraction_assisted_income','fraction_high_school_edu','median_income','fraction_no_health_ins','fraction_poverty','fraction_vacant_housing','dep_index','drivetime_selected_center','nearest_center_pcgc','drivetime_pcgc','version'
+                              Dafault fields: 'id','address_date','precision','geocode_result','fraction_assisted_income','fraction_high_school_edu','median_income','fraction_no_health_ins','fraction_poverty','fraction_vacant_housing','dep_index','drivetime_selected_center','nearest_center_pcgc','drivetime_pcgc','version'
         
 
       "
