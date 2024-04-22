@@ -6,10 +6,6 @@ name: Docker
  # documentation.
 
 on:
-  workflow_dispatch:
-
-  schedule:
-     - cron: '37 14 * * *'
   push:
      branches: [ "main" ]
      # Publish semver tags as releases.
@@ -23,78 +19,43 @@ env:
    # github.repository as <account>/<repo>
    IMAGE_NAME: ${{ github.repository }}
 
-
 jobs:
-   build:
+  build-docker-container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
-     runs-on: ubuntu-latest
-     permissions:
-       contents: read
-       packages: write
-       # This is used to complete the identity challenge
-       # with sigstore/fulcio when running outside of PRs.
-       id-token: write
+      - name: Build the docker image
+        run: |
+          export TAG='0.0.2'
+          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
+          docker-compose -f docker-compose.yaml build
+        env:
+          DOCKER_USERNAME: ${{ github.repository }}
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
-     steps:
-       - name: Checkout repository
-         uses: actions/checkout@v3
+      - name: branch Push Docker image to github package registry
+        run: |
+          export TAG='0.0.2'
+          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
+          docker-compose -f docker-compose.yaml push
+        env:
+          DOCKER_USERNAME: ${{ github.repository }}
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
-       # Install the cosign tool except on PR
-       # https://github.com/sigstore/cosign-installer
-       - name: Install cosign
-         if: github.event_name != 'pull_request'
-         uses: sigstore/cosign-installer@v3.3.0
-         with:
-           cosign-release: 'v2.2.2' # optional
+      - name: Build the docker image with latest tag
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
+          docker-compose -f docker-compose.yaml build
+        env:
+          DOCKER_USERNAME: ${{ github.repository }}
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
-       # Workaround: https://github.com/docker/build-push-action/issues/461
-       - name: Setup Docker buildx
-         uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+      - name: branch Push Docker image to github package registry with latest tag
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
+          docker-compose -f docker-compose.yaml push
+        env:
+          DOCKER_USERNAME: ${{ github.repository }}
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
-       # Login against a Docker registry except on PR
-       # https://github.com/docker/login-action
-       
-       - name: Log in to the Container registry
-         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-         with:
-           registry: ${{ env.REGISTRY }}
-           username: ${{ github.actor }}
-           password: ${{ secrets.GITHUB_TOKEN }}
-
-
-       # Extract metadata (tags, labels) for Docker
-       # https://github.com/docker/metadata-action
-       - name: Extract metadata (tags, labels) for Docker
-         id: meta
-         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-         with:
-           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-       # Build and push Docker image with Buildx (don't push on PR)
-       # https://github.com/docker/build-push-action
-       - name: Build and push Docker image
-         id: build-and-push
-         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
-         with:
-           context: .
-           push: ${{ github.event_name != 'pull_request' }}
-           tags: ${{ steps.meta.outputs.tags }}
-           labels: ${{ steps.meta.outputs.labels }}
-           cache-from: type=gha
-           cache-to: type=gha,mode=max
-
-
-       # Sign the resulting Docker image digest except on PRs.
-       # This will only write to the public Rekor transparency log when the Docker
-       # repository is public to avoid leaking data.  If you would like to publish
-       # transparency data even for private images, pass --force to cosign below.
-       # https://github.com/sigstore/cosign
-       - name: Sign the published Docker image
-         if: ${{ github.event_name != 'pull_request' }}
-         env:
-           # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-           TAGS: ${{ steps.meta.outputs.tags }}
-           DIGEST: ${{ steps.build-and-push.outputs.digest }}
-         # This step uses the identity token to provision an ephemeral certificate
-         # against the sigstore community Fulcio instance.
-         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
