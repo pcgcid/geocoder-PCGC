@@ -24,14 +24,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
 
       - name: Build the docker image
         run: |
           export TAG=${{ github.ref_name }}
           echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
           docker-compose -f docker-compose.yaml build
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -41,7 +40,6 @@ jobs:
           export TAG=${{ github.ref_name }}
           echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
           docker-compose -f docker-compose.yaml push
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -50,7 +48,6 @@ jobs:
         run: |
           echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
           docker-compose -f docker-compose.yaml build
-        if: github.ref == 'refs/heads/master'
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -59,7 +56,6 @@ jobs:
         run: |
           echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
           docker-compose -f docker-compose.yaml push
-        if: github.ref == 'refs/heads/master'
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
