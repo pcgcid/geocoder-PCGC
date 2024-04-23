@@ -34,28 +34,16 @@ jobs:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: branch Push Docker image to github package registry
-        run: |
-          export TAG='0.0.2'
-          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
-          docker-compose -f docker-compose.yaml push
-        env:
-          DOCKER_USERNAME: ${{ github.repository }}
-          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build the docker image with latest tag
-        run: |
-          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
-          docker-compose -f docker-compose.yaml build
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:0.0.2
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
       - name: branch Push Docker image to github package registry with latest tag
-        run: |
-          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
-          docker-compose -f docker-compose.yaml push
+        run: docker push ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:0.0.2
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
 
