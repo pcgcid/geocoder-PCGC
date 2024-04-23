@@ -31,7 +31,7 @@ jobs:
             docker version
 
       - name: Build the docker image with latest tag
-        run: docker build -t ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:0.0.2
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:0.0.2 .
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
