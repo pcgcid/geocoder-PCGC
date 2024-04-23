@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  markdown-to-pdf:
+  pcgc-geocoder:
     container_name: pcgc_geocoder
     build:
       context: .
