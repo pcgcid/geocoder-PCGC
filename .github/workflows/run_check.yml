@@ -33,6 +33,9 @@ jobs:
       - name: Check Docker version if OS is Windows
         if: runner.os == 'Windows'
         run: docker version 
+
+      - name: test docker
+        run: docker run hello-world
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
       - name: Install tidyverse
