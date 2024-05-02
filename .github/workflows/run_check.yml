@@ -11,7 +11,7 @@ jobs:
             config:
                 - {os: macos-12,   r: 'release'}
                 - {os: ubuntu-latest, r: 'devel'}
-                # - {os: windows-latest, r: 'release'}
+                - {os: windows-2022, r: 'release'}
     steps:
       - uses: actions/checkout@v4
       - uses: r-lib/actions/setup-r@v2
@@ -21,10 +21,18 @@ jobs:
         with:
             r-version: ${{ matrix.config.r }}
 
-      - uses: docker-practice/actions-setup-docker@master
-      - run: |
-            set -x
-            docker version
+      - name: Setup Docker
+        if: runner.os != 'Windows'
+        uses: docker-practice/actions-setup-docker@master
+      - name: Check Docker version
+        if: runner.os != 'Windows'
+        run: |
+          set -x
+          docker version
+
+      - name: Check Docker version if OS is Windows
+        if: runner.os == 'Windows'
+        run: docker version 
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
       - name: Install tidyverse
