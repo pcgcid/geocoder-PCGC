@@ -35,7 +35,10 @@ jobs:
         run: docker version 
 
       - name: test docker
-        run: docker run hello-world
+        run: |
+              docker run hello-world
+              DOCKER_PATH=$(which docker)
+              echo "Docker path: $DOCKER_PATH"
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
       - name: Install tidyverse
