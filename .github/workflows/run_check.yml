@@ -35,8 +35,7 @@ jobs:
         run: |
               docker version 
               docker run hello-world
-              $env:DOCKER_PATH = (Get-Command docker).Source
-              Write-Host "Docker path: $DOCKER_PATH"
+              where.exe docker
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
       - name: Install tidyverse
