@@ -35,6 +35,7 @@ jobs:
         run: |
               docker version 
               docker run hello-world
+              docker pull ghcr.io/dohn5r/geocoder_pcgc:0.0.1
               where.exe docker
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
