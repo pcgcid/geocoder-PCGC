@@ -32,13 +32,11 @@ jobs:
 
       - name: Check Docker version if OS is Windows
         if: runner.os == 'Windows'
-        run: docker version 
-
-      - name: test docker
         run: |
+              docker version 
               docker run hello-world
-              DOCKER_PATH=$(which docker)
-              echo "Docker path: $DOCKER_PATH"
+              $env:DOCKER_PATH = (Get-Command docker).Source
+              Write-Host "Docker path: $DOCKER_PATH"
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
       - name: Install tidyverse
