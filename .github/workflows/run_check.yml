@@ -9,9 +9,9 @@ jobs:
         fail-fast: false
         matrix:
             config:
-                # - {os: macos-12,   r: 'release'}
-                # - {os: ubuntu-latest, r: 'devel'}
-                - {os: windows-2022, r: 'release'}
+                - {os: macos-12,   r: 'release'}
+                - {os: ubuntu-latest, r: 'devel'}
+                # - {os: windows-2022, r: 'release'}
     steps:
       - uses: actions/checkout@v4
       - uses: r-lib/actions/setup-r@v2
@@ -34,9 +34,6 @@ jobs:
         if: runner.os == 'Windows'
         run: |
               docker version 
-              Get-VM WinContainerHost | Set-VMProcessor -ExposeVirtualizationExtensions $true
-              [Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")
-              Restart-Service docker
               docker run hello-world
               docker pull ghcr.io/dohn5r/geocoder_pcgc:0.0.1
               where.exe docker
