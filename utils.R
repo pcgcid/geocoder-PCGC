@@ -70,7 +70,7 @@ rdcrn_drivetime_selected_center <- function(filename, out_filename, selected_sit
 
 
 rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
-  #browser()
+  require(dplyr)
   
   d <- readr::read_csv(filename, show_col_types = FALSE)
   # d <- readr::read_csv('test/my_address_file.csv')
@@ -84,6 +84,12 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
   d$address <- dht::clean_address(d$address)
   d$po_box <- dht::address_is_po_box(d$address)
   d$non_address_text <- dht::address_is_nonaddress(d$address)
+  
+  if ('score' %in% colnames(d) & 'precision' %in% colnames(d) & 'geocode_result' %in% colnames(d)){
+    d <- d %>%
+      dplyr::select(-c('score','precision')) %>%
+      dplyr::select(-starts_with('matched_'))
+  }
   
   ## exclude 'bad' addresses from geocoding (unless specified to return all geocodes)
   if (score_threshold == "all") {
@@ -456,8 +462,15 @@ rdcrn_run <- function(opt){
   if ("lat" %in% colnames(d) &"lon" %in% colnames(d)) {
     d_lat_lon = d %>%
       dplyr::filter(is.na(lat & lon) & !is.na(address))
-  
-   if (nrow(d_lat_lon) == 0){rm('d_lat_lon')}
+    
+    if ('score' %in% colnames(d) & 'precision' %in% colnames(d) & 'geocode_result' %in% colnames(d)){
+      d_lat_lon <- d_lat_lon %>%
+        dplyr::filter(is.na(geocode_result) | geocode_result == "" )
+    }
+    
+    if (nrow(d_lat_lon) == 0){
+      rm('d_lat_lon')
+    }
   }
 
   # check if we have coordinates -- if not let's geocode first
