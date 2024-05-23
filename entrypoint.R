@@ -25,7 +25,7 @@ doc <- "
         -s --site <selected site>
                               Specify site.
         --site-list           Print all available sites.
-        -o <output-prefix> --output-file-prefix <output-prefix>
+        -o --output-file-prefix <output-prefix>
                               Specify output prefix ( By default, the prefix is `output`, which will generate output.log, output-phi.csv, output-deid.csv).
         -f --include-deid-fields <fields>
                               Specify list of fields to include in output.
