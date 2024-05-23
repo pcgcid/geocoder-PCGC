@@ -88,9 +88,9 @@ If `my_address_file.csv` is an address file in the current working directory wit
 
 will produce 3 output files:
 
-- `UTAH_output.csv`: This file has full output data, __including PII data__. Do NOT sent this to the ACC.
+- `UTAH_output-with-phi.csv`: This file has full output data, __including PII data__. Do NOT sent this to the ACC.
 - `UTAH_output-deid.csv`: This file contains de-identified fields specified by the user as well as location-derived information. By default, the list of de-identified fields contain "id","address_date","matched_state","precision","geocode_result","fraction_assisted_income", "fraction_high_school_edu","median_income","fraction_no_health_ins","fraction_poverty","fraction_vacant_housing", "dep_index","drivetime_selected_center","nearest_center_pcgc","drivetime_pcgc","version". “id” and “address_date” are copied verbatim from the input address file; it is the user's responsibility to ensure they don’t contain PHI
-- `UTAH_output-log.txt`: This file is an output log of the processing.
+- `UTAH_output-log.txt`: This file is an output log of processing.
 
 **_Note_**: The example above uses `-s PCGC_UTAH` for PCGC center in Utah. To change the care center, replace `-s PCGC_UTAH` with one of the site abbrevations below (e.g., `-s PCGC_YALE`):
 
@@ -164,7 +164,7 @@ PCGC_CHLA | `Childrens of LA`
 
 This container takes the following optional arguments:
 
--   `-o` or `--output-file-prefix` to specify prefix of output files. By default, the prefix is `output`, which will generate output.log, output-phi.csv, output-deid.csv
+-   `-o` or `--output-file-prefix` to specify prefix of output files. By default, the prefix is `output`, which will generate output-log.txt, output-phi.csv, output-deid.csv
 -   `--f` or `--include-deid-fields` to specify list of fields to include in output. Default fields:
     - id, address_date, precision, geocode_result, fraction_assisted_income, fraction_high_school_edu, median_income, fraction_no_health_ins, fraction_poverty, fraction_vacant_housing, dep_index, drivetime_selected_center, nearest_center_pcgc, drivetime_pcgc, version
 -   `--force` to force the container to overwrite output files if one of the output files already exists. By default, the program would exit if one of the output files already exists
