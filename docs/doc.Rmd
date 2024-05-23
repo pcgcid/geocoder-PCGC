@@ -172,7 +172,7 @@ This container takes the following optional arguments:
 ### Running the PCGC  container (additional details)
 This Docker image does the following:
 
-1. perform geocoding on addresses (if not geocoded already, i.e., if `lat` and `lon` are not specified in the input), adding the following columns:
+- perform geocoding on addresses (if not geocoded already, i.e., if `lat` and `lon` are not specified in the input), adding the following columns:
 
   - **`matched_street`**, **`matched_city`**, **`matched_state`**, **`matched_zip`**: matched address componets (e.g., `matched_street` is the street the geocoder matched with the input address); can be used to investigate input address misspellings, typos, etc.
   - **`precision`**: The method/precision of the geocode. The value will be one of:
