@@ -480,14 +480,40 @@ rdcrn_run <- function(opt){
     drivetime_input <- out_filename
   } else {
     cat("Input data has already been geocoded. Skip geocoding","\n")
+    geocoded_df = d
     drivetime_input <- opt$filename
   }
   
   #Skip calculating deprivation index if testing
   cat("\nComputing deprivation index:\n")
-  output_dep = rdcrn_dep_idx(drivetime_input, out_filename)
-  write.csv(output_dep, file = out_filename,row.names = F, na = "")
   
+  dep_cols = c('census_tract_id','fraction_assisted_income','fraction_high_school_edu','median_income','fraction_no_health_ins','fraction_poverty','fraction_vacant_housing','dep_index','drivetime_selected_center','nearest_center_pcgc','drivetime_pcgc')
+  if (all(dep_cols %in% names(d))){
+    if ('d_lat_lon' %in% ls()){
+      df_dep = d_lat_lon %>%
+        dplyr::filter(if_all(all_of(dep_cols), ~ !is.na(.)))
+      if (nrow(df_dep) == 0) {rm('df_dep')}
+    }
+    
+    if (!'df_dep' %in% ls()) {
+      cat("\n","Deprivation index has already been computed in input data. Skip deprivation index computation","\n")
+      drivetime_input <- opt$filename
+      output_dep = geocoded_df %>%
+        dplyr::select(-c('nearest_center_pcgc','drivetime_pcgc','drivetime_selected_center'))
+    } 
+      
+  } else {
+      #if there are geocoded data with non-missing addresses in data with deprivation columns, we still do deprivation index computation
+      temp_file <- tempfile()
+      input_data = geocoded_df %>%
+        dplyr::select(-any_of(dep_cols))
+      write.csv(input_data, file = temp_file,row.names = F, na = "")
+      drivetime_input <- temp_file
+      output_dep = rdcrn_dep_idx(drivetime_input, out_filename)
+  }
+  
+  write.csv(output_dep, file = out_filename,row.names = F, na = "")
+
   cat("\nFinished computing deprivation index\n")
   
   
@@ -531,18 +557,5 @@ rdcrn_run <- function(opt){
   
   sink(type = "output",split=TRUE)
   sink(type = "message")
-
-
-
-  #return(list(output_df = output_pcgc_df, d_pcgc_list = d_pcgc_list, output_dep = output_dep))
   
-  # if (opt$shiny){
-  #   output_pcgc = rdcrn_drivetime(out_filename, out_filename,"pcgc")
-  #   output_pcgc_df = output_pcgc$output
-  #   d_pcgc_list = output_pcgc$d_to_pcgc_centers
-  # 
-  #   return(list(output_df = output_pcgc_df, d_pcgc_list = d_pcgc_list))
-  # }
-  
-
 }
