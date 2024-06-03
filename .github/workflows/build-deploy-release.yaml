@@ -1,0 +1,45 @@
+name: build-deploy-release
+on:
+  release:
+    types: [published]
+jobs:
+  deploy-images:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      USERNAME: ${{ github.repository_owner }}
+      REPOSITORY: ${{ github.repository }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker-practice/actions-setup-docker@master
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create latest tag variable
+        run: echo "CONTAINER=${{ env.REGISTRY }}/${{ env.USERNAME }}/geocoder_pcgc:latest" >> $GITHUB_ENV
+
+      - name: Create release tag variable
+        if: github.event_name == 'release'
+        run: |
+          version_tag=${GITHUB_REF#refs/tags/}
+          echo "VERSIONED=${{ env.REGISTRY }}/${{ env.USERNAME }}/geocoder_pcgc:${version_tag}" >> $GITHUB_ENV
+
+      - name: Build container
+        run: docker build -t ${{ env.CONTAINER }} .
+
+      - name: Tag and push release (and latest) container
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            docker tag ${{ env.CONTAINER }} ${{ env.VERSIONED }}
+            docker push ${{ env.VERSIONED }}
+          fi
+          docker push ${{ env.CONTAINER }}
