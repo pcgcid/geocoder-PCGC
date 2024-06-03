@@ -1,6 +1,10 @@
 
 name: Run checks
-on: [push]
+on: 
+  workflow_run:
+    workflows: [Build and publish Docker image]
+    types:
+      - completed
 jobs:
   r-cmd-check:
     runs-on: ${{ matrix.config.os }}
