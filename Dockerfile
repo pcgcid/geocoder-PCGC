@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.2.1
+FROM rocker/r-ver:4.4.0
 
 # DeGAUSS container metadata
 ENV degauss_name="geocoder"
@@ -27,6 +27,8 @@ RUN apt-get update && apt-get install -y \
     libssh2-1-dev \
     libcurl4-openssl-dev \
     libxml2-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
     make \
     sqlite3 \
     libsqlite3-dev \
@@ -43,6 +45,10 @@ RUN apt-get update && apt-get install -y \
     libfontconfig1-dev \
     libfreetype6-dev \
     ruby-full \
+    libgit2-dev \
+    libproj-dev \
+    libgeos-dev \
+    libsecret-1-0 \
     && apt-get clean
 
 
@@ -73,14 +79,10 @@ RUN R --quiet -e "remotes::install_github('rstudio/renv@0.15.4')"
 COPY renv.lock .
 RUN R --quiet -e "renv::restore()"
 
-RUN R -e "renv::install('degauss-org/dht')"
-RUN apt update && apt install -y libsecret-1-0
+#RUN R -e "renv::install('degauss-org/dht')"
 
 RUN R -e "renv::install('Rcpp')"
 RUN R -e "renv::install('GIScience/openrouteservice-r')"
-RUN R -e "renv::install('sf')"
-RUN apt install -y  libudunits2-dev libproj-dev libgdal-dev libgeos-dev
-RUN R -e 'install.packages(c("shiny", "shinydashboard", "docopt", "sf"), repos="https://cran.rstudio.com/")'
 
 
 COPY geocode.rb .
@@ -90,7 +92,6 @@ COPY utils.R .
 
 COPY ./pcgc_isochrones.csv /app
 COPY ./isochrones_pcgc_no_overlap.rds /app
-COPY ./app.R /app
 COPY ./. /app
 
 
@@ -98,8 +99,6 @@ COPY ./. /app
 WORKDIR /tmp
 
 
+
 ENTRYPOINT ["/app/entrypoint.R"]
 
-# Expose port 3838
-EXPOSE 3838
-#CMD ["/bin/bash"]
