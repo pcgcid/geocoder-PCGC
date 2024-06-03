@@ -1,6 +1,5 @@
 name: build-deploy-release
 on:
-  push:
   release:
     types: [published]
 jobs:
