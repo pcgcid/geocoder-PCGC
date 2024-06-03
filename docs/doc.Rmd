@@ -192,7 +192,7 @@ This Docker image does the following:
     
 - then join with tract-level deprivation index data derived from the 2018 American Community Survey (ACS), adding the following columns:
 
-  - **`fips_tract_id`**: 2010 census tract identifier
+  - **`census_tract_id`**: 2010 census tract identifier
   
   - 2018 American Community Survey variables:
     
