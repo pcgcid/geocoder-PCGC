@@ -84,6 +84,13 @@ PCGC_CHLA | `Childrens of LA`
 
 **_Note_**: On Windows computers you may need to give Docker explicit permissions to access the folder containing the address file (and possibly restart the Docker daemon after you have done so). Please check the Docker documentation for details.
 
+<center><img src="figs/Windows_permission.png" width="75%"></center>
+
+However, if notifications are disabled, the confirmation box will not appear and Docker will automatically decline the permission. In that case, go to **Docker Settings > Resources > FileSharing**. Add required folder and hit Apply & Restart
+
+<center><img src="figs/Docker_Resources_settings.png" width="75%"></center>
+
+
 **_Note_**: The first time this process is run, docker will download the latest container from the ACC, which takes a few minutes of time. Later runs will not require internet connections (unless the container is to be updated with the latest version).
 
 **_Note_**: After processing, __please__ inspect the output files and fix obvious formatting problems with the address file should they arise (see also the section below on input address data formatting). The `*-deid.csv` file is safe to be sent to the ACC via secure upload to AWS (similar to the EMR data uploads).
