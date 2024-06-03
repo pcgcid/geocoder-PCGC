@@ -18,12 +18,12 @@ jobs:
         uses: actions/checkout@v2
       - name: create latest tag variable
         run: |
-          container="${{ env.registry }}/${{ env.repository }}:latest"
+          container="${{ env.registry }}/geocoder_pcgc:latest"
           echo "container=${container}" >> $GITHUB_ENV
       - name: create release tag variable
         if: github.event_name == 'release'
         run: |
-          versioned="${{ env.registry }}/${{ env.repository }}:${GITHUB_REF##*/}"
+          versioned="${{ env.registry }}/geocoder_pcgc:${GITHUB_REF##*/}"
           echo "versioned=${versioned}" >> $GITHUB_ENV
       - name: build container
         run: |
