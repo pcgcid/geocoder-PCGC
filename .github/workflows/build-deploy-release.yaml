@@ -6,39 +6,40 @@ jobs:
   deploy-images:
     runs-on: ubuntu-latest
     env:
-      registry: ghcr.io
-      username: degauss-org
-      repository: geocoder
-    strategy:
-      fail-fast: false
+      REGISTRY: ghcr.io
+      USERNAME: ${{ github.repository_owner }}
+      REPOSITORY: ${{ github.repository }}
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: create latest tag variable
-        run: |
-          container="${{ env.registry }}/${{ env.username}}/${{ env.repository }}:latest"
-          echo "container=${container}" >> $GITHUB_ENV
-      - name: create release tag variable
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker-practice/actions-setup-docker@master
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create latest tag variable
+        run: echo "CONTAINER=${{ env.REGISTRY }}/${{ env.USERNAME }}/geocoder_pcgc:latest" >> $GITHUB_ENV
+
+      - name: Create release tag variable
         if: github.event_name == 'release'
         run: |
-          versioned="${{ env.registry }}/${{ env.username}}/${{ env.repository }}:${GITHUB_REF##*/}"
-          echo "versioned=${versioned}" >> $GITHUB_ENV
-      - name: build container
+          version_tag=${GITHUB_REF#refs/tags/}
+          echo "VERSIONED=${{ env.REGISTRY }}/${{ env.USERNAME }}/geocoder_pcgc:${version_tag}" >> $GITHUB_ENV
+
+      - name: Build container
+        run: docker build -t ${{ env.CONTAINER }} .
+
+      - name: Tag and push release (and latest) container
         run: |
-          docker build -t ${{ env.container }} .
-      - name: test container
-        run: |
-          docker run --rm -v "${PWD}/test":/tmp ${{ env.container }} my_address_file.csv
-          docker run --rm -v "${PWD}/test":/tmp ${{ env.container }} my_address_file.csv 0.6
-          docker run --rm -v "${PWD}/test":/tmp ${{ env.container }} my_address_file.csv all
-      - name: login to ghcr
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.registry }}
-          username: ${{ env.username }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: deploy release (and latest) container
-        run: |
-          docker tag ${{ env.container }} ${{ env.versioned }}
-          docker push ${{ env.versioned }}
-          docker push ${{ env.container }}
+          if [ "${{ github.event_name }}" = "release" ]; then
+            docker tag ${{ env.CONTAINER }} ${{ env.VERSIONED }}
+            docker push ${{ env.VERSIONED }}
+          fi
+          docker push ${{ env.CONTAINER }}
