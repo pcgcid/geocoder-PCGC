@@ -1,13 +1,6 @@
 name: Build and publish Docker image
-
- # This workflow uses actions that are not certified by GitHub.
- # They are provided by a third-party and are governed by
- # separate terms of service, privacy policy, and support
- # documentation.
-
 on:
-  release:
-    types: [published]
+  push
 env:
    # Use docker.io for Docker Hub if empty
    REGISTRY: ghcr.io
@@ -33,7 +26,7 @@ jobs:
            password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build the docker image with latest tag
-        run: docker build -t ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:latest .
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:alpha .
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
