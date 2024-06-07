@@ -3,7 +3,6 @@ name: build-deploy-release
 on:
   release:
     types: [published]
-  push:
 jobs:
   deploy-images:
     runs-on: ubuntu-latest
