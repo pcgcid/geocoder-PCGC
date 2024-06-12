@@ -5,7 +5,7 @@ context("Docker Image Tests")
 
 test_that("Docker image runs successfully", {
   # Pull the Docker image
-  system("docker pull ghcr.io/dohn5r/geocoder_pcgc:0.0.1")
+  system("docker pull ghcr.io/dohn5r/geocoder_pcgc:latest")
   
   # Get the current working directory
   current_dir <- getwd()
@@ -15,7 +15,7 @@ test_that("Docker image runs successfully", {
   
   # Construct the Docker run command with the correct path
   docker_command <- paste0(
-    "docker run -v '", current_dir, "':/tmp ghcr.io/pcgcid/geocoder_pcgc:0.0.1",
+    "docker run -v '", current_dir, "':/tmp ghcr.io/pcgcid/geocoder_pcgc:latest",
     " -s PCGC_UTAH -i /tmp/address-sample-date-UTAH.csv -o output"
   )
   
