@@ -47,14 +47,14 @@ if (is.null(input_file)){
 }
 
 if (is.null(site)){
-  stop("PCGC site argument is missing. Please use `docker run ghcr.io/dohn5r/geocoder_pcgc:0.0.1 --site-list` to see a list of available site")
+  stop("PCGC site argument is missing. Please use `docker run ghcr.io/dohn5r/geocoder_pcgc:latest --site-list` to see a list of available site")
 }
 
 
 sites = readr::read_csv('/app/pcgc_isochrones.csv')$abbreviation %>% unlist()
 if (!site %in% sites){
   stop('The site you specified is not one of our available sites.
-       \nRun `docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 --site-list` to see all available sites')
+       \nRun `docker run ghcr.io/pcgcid/geocoder_pcgc:latest --site-list` to see all available sites')
 }
 
 if (!file.exists(input_file)){
@@ -95,7 +95,7 @@ if (!is.null(args_list$filename) & !is.null(args_list$site)){
 
 # Handle version option
 if (opt$version | opt$ver) {
-  cat("Version: geoocoder_PCGC_0.0.1\n")
+  cat("Version: geoocoder_PCGC_0.0.2\n")
   q(status = 0)
 }
 

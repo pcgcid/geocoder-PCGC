@@ -53,14 +53,14 @@ If `my_address_file.csv` is an address file in the current working directory wit
   - macOS:
   
     ```sh
-    docker run --rm -v $PWD:/tmp ghcr.io/pcgcid/geocoder_pcgc:0.0.1 \
+    docker run --rm -v $PWD:/tmp ghcr.io/pcgcid/geocoder_pcgc:latest \
     -s PCGC_UTAH -i my_address-file.csv -o UTAH_output 
     ```
   
   - Windows (CMD):
   
     ```sh
-    docker run --rm -v "%cd%":/tmp ghcr.io/pcgcid/geocoder_pcgc:0.0.1 ^
+    docker run --rm -v "%cd%":/tmp ghcr.io/pcgcid/geocoder_pcgc:latest ^
     -s PCGC_UTAH -i my_address-file.csv -o UTAH_output 
     ```
 
@@ -102,25 +102,25 @@ Command line parameters to show help, version and site list are as follows:
 - `-h` or `--help`: Show available parameters. For example, users can use this command:
 
   ```sh
-  docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 -h
+  docker run ghcr.io/pcgcid/geocoder_pcgc:latest -h
   ```
 or 
   ```sh
-  docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 --help
+  docker run ghcr.io/pcgcid/geocoder_pcgc:latest --help
   ```
 
 - `-v` or `--version`: Show the current version of Docker container with this command:
   ```sh
-  docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 -v
+  docker run ghcr.io/pcgcid/geocoder_pcgc:latest -v
   ```
   or 
   ```sh
-  docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 --version
+  docker run ghcr.io/pcgcid/geocoder_pcgc:latest --version
   ```
 
 - `--site-list`: Print all available sites with this command:
   ```sh
-  docker run ghcr.io/pcgcid/geocoder_pcgc:0.0.1 --site-list
+  docker run ghcr.io/pcgcid/geocoder_pcgc:latest --site-list
   ```
 
 This container __requires__ both of the following arguments:
