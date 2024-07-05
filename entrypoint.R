@@ -42,6 +42,22 @@ output_prefix <- opt[["--output-file-prefix"]]
 include_deid_fields <- opt[["--include-deid-fields"]]
 force <- opt[["--force"]]
 
+
+# Handle version option
+if (opt[['--site-list']]) {
+  centers_list <- read.csv('/app/pcgc_isochrones.csv')$abbreviation
+  
+  cat("List of available sites:\n")
+  cat(paste(centers_list, collapse = "\n"),"\n")
+  q(status = 0)
+}
+
+# Handle version option
+if (opt$version | opt$ver) {
+  cat("Version: geoocoder_PCGC_0.0.2\n")
+  q(status = 0)
+}
+
 if (is.null(input_file)){
   stop("Input csv is missing. Please specify a .csv address file")
 }
@@ -52,6 +68,7 @@ if (is.null(site)){
 
 
 sites = readr::read_csv('/app/pcgc_isochrones.csv')$abbreviation %>% unlist()
+
 if (!site %in% sites){
   stop('The site you specified is not one of our available sites.
        \nRun `docker run ghcr.io/pcgcid/geocoder_pcgc:latest --site-list` to see all available sites')
@@ -82,31 +99,11 @@ if (!is.null(args_list$filename) & !is.null(args_list$site)){
 
   result = rdcrn_run(args_list)
   
-
-  
-  # etxtStart(dir = ".", file =log_filename )
-  # rdcrn_run(args_list)
-  # etxtStop()
-
-  
-  # writeLines(capture.output(rdcrn_run(args_list)),  log_filename)
   }
 
 
-# Handle version option
-if (opt$version | opt$ver) {
-  cat("Version: geoocoder_PCGC_0.0.2\n")
-  q(status = 0)
-}
 
-# Handle version option
-if (opt[['--site-list']]) {
-  centers_list <- read.csv('/app/pcgc_isochrones.csv')$abbreviation
-  
-  cat("List of available sites:\n")
-  cat(paste(centers_list, collapse = "\n"),"\n")
-  q(status = 0)
-}
+
 
 
 

@@ -18,7 +18,7 @@ rdcrn_drivetime_selected_center <- function(filename, out_filename, selected_sit
   centers = centers %>% arrange(abbreviation)
   
   if (! selected_site %in% centers$abbreviation){
-    stop('site argument is invalid or missing; please consult documentation for details', call. = FALSE)
+    stop('site argument is not one of our available sites or missing; \nRun `docker run ghcr.io/pcgcid/geocoder_pcgc:latest --site-list` to see all available sites', call. = FALSE)
   }
   
   d <- dht::read_lat_lon_csv(filename, nest_df = T, sf_out = T, project_to_crs = 5072)
@@ -420,12 +420,11 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
 
 
 rdcrn_run <- function(opt){
-  if (is.null(opt$output_prefix)){opt$output_prefix = 'output'}
-  log_filename = paste0(output_prefix, "-log.txt")
+  if (is.null(opt$output_prefix) |!'output_prefix' %in% opt){opt$output_prefix = 'output'}
+  log_filename = paste0(opt$output_prefix, "-log.txt")
   
 
   
-  # #browser()
   out_filename = paste0(opt$output_prefix, "-with-phi.csv")
   deid_filename = paste0(opt$output_prefix, "-deid.csv")
 
@@ -461,13 +460,8 @@ rdcrn_run <- function(opt){
   #if there are geocoded data with non-missing addresses in data with `lat` and `lon` columns, we still do the geocoding
   if ("lat" %in% colnames(d) &"lon" %in% colnames(d)) {
     d_lat_lon = d %>%
-      dplyr::filter(is.na(lat & lon) & !is.na(address))
-    
-    if ('score' %in% colnames(d) & 'precision' %in% colnames(d) & 'geocode_result' %in% colnames(d)){
-      d_lat_lon <- d_lat_lon %>%
-        dplyr::filter(is.na(geocode_result) | geocode_result == "" )
-    }
-    
+      dplyr::filter(is.na(lat & lon) & !is.na(address)) 
+
     if (nrow(d_lat_lon) == 0){
       rm('d_lat_lon')
     }
@@ -537,8 +531,8 @@ rdcrn_run <- function(opt){
     field_list = include_deid_fields
   }else{
     field_list = unlist(strsplit(include_deid_fields,","))
-    
-    if (length(include_deid_fields) == 1 &  field_list > 1){
+
+    if (length(include_deid_fields) == 1 &  length(field_list) > 1){
         field_list = trimws(field_list)
     }
   }
