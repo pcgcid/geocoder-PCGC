@@ -27,7 +27,7 @@ jobs:
 
       - name: Setup Docker
         if: runner.os != 'Windows'
-        uses: docker-practice/actions-setup-docker@master
+        uses: docker/setup-docker-action@v4
       - name: Check Docker version
         if: runner.os != 'Windows'
         run: |
