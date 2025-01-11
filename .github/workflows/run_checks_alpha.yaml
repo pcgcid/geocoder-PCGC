@@ -13,7 +13,7 @@ jobs:
         fail-fast: false
         matrix:
             config:
-                - {os: macos-12,   r: 'release'}
+                - {os: macos-13,   r: 'release'}
                 - {os: ubuntu-latest, r: 'devel'}
                 # - {os: windows-2022, r: 'release'}
     steps:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Setup Docker
         if: runner.os != 'Windows'
-        uses: docker-practice/actions-setup-docker@master
+        uses: docker/setup-docker-action@v4
       - name: Check Docker version
         if: runner.os != 'Windows'
         run: |
@@ -39,7 +39,7 @@ jobs:
         run: |
               docker version 
               docker run hello-world
-              docker pull ghcr.io/dohn5r/geocoder_pcgc:alpha
+              docker pull ghcr.io/pcgcid/geocoder_pcgc:alpha
               where.exe docker
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
