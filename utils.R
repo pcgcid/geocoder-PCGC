@@ -23,7 +23,6 @@ rdcrn_drivetime_selected_center <- function(filename, out_filename, selected_sit
   
   d <- dht::read_lat_lon_csv(filename, nest_df = T, sf_out = T, project_to_crs = 5072)
   
-  
   d$d = d$d %>% dplyr::rename_with(., stringr::str_to_lower) %>% tidyr::unnest(.rows)
   
   d$raw_data = d$raw_data %>% dplyr::rename_with(., stringr::str_to_lower) 
@@ -45,7 +44,7 @@ rdcrn_drivetime_selected_center <- function(filename, out_filename, selected_sit
     st_as_sf(coords = c('lon', 'lat'), crs = 4326) %>%
     st_transform(5072)
 
-
+  
   d$d$drivetime_selected_center <-(st_join(d$d, isochrones, largest = F) %>% 
                     dplyr::distinct(.row, .keep_all = TRUE))$drive_time 
 
@@ -165,8 +164,9 @@ rdcrn_geocode <- function(filename, out_filename, score_threshold = 0.5) {
       dplyr::mutate(precision = factor(precision,
                                        levels = c("range", "street", "intersection", "zip", "city"),
                                        ordered = TRUE
-      )) %>%
-      dplyr::arrange(desc(precision), score)
+      )) 
+    # %>%
+    #   dplyr::arrange(desc(precision), score)
   } 
   ## comment this block of code out as the situation has already been handled in rdcrn_run():
   # else if (nrow(d_for_geocoding) == 0 & score_threshold != "all") {
