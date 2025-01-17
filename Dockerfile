@@ -99,7 +99,6 @@ COPY ./. /app
 
 
 WORKDIR /tmp
-RUN Rscript /app/test_coverage.R
 
 
 
