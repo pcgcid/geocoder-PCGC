@@ -103,6 +103,9 @@ PCGC_COLUMBIA | `Columbia`
 PCGC_CHOP | `CHOP`
 PCGC_UTAH | `Utah`
 PCGC_CHLA | `Childrens of LA`
+PCGC_CHOA	| `Atlanta`
+PCGC_UMICH | `Michigan`
+
 
 **_Note_**: On Windows computers you may need to give Docker explicit permissions to access the folder containing the address file (and possibly restart the Docker daemon after you have done so). 
 \begin{center}
@@ -160,6 +163,8 @@ PCGC_COLUMBIA | `Columbia`
 PCGC_CHOP | `CHOP`
 PCGC_UTAH | `Utah`
 PCGC_CHLA | `Childrens of LA`
+PCGC_CHOA	| `Atlanta`
+PCGC_UMICH | `Michigan`
 
 
 This container takes the following optional arguments:
