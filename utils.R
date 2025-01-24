@@ -404,7 +404,7 @@ rdcrn_drivetime <- function(filename, out_filename, consortium = "pcgc") {
 
 
 rdcrn_run <- function(opt){
-  if (is.null(opt$output_prefix) |!'output_prefix' %in% opt){opt$output_prefix = 'output'}
+  if (is.null(opt$output_prefix) |!'output_prefix' %in% names(opt)){opt$output_prefix = 'output'}
   log_filename = paste0(opt$output_prefix, "-log.txt")
   
 
