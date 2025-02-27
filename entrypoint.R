@@ -35,6 +35,8 @@ doc <- "
       "
 opt <- docopt::docopt(doc)
 
+cat("\nRunning version with Commit:", Sys.getenv("GIT_COMMIT"), "of Date:", Sys.getenv("GIT_DATE"), "\n")
+
 # Access the parsed arguments
 input_file <- opt[["--input-file"]]
 site <- opt[["--site"]]
@@ -77,7 +79,6 @@ if (!site %in% sites){
 if (!file.exists(input_file)){
   stop("Cannot find input file. Please check if the input file exists.")
 }
-
 
 
 

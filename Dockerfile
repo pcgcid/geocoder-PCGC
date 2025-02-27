@@ -1,5 +1,11 @@
 FROM rocker/r-ver:4.4.1 
 
+ARG GIT_COMMIT
+ARG GIT_DATE
+
+ENV GIT_COMMIT=$GIT_COMMIT
+ENV GIT_DATE=$GIT_DATE
+
 # DeGAUSS container metadata
 ENV degauss_name="geocoder"
 ENV degauss_version="3.3.0"
