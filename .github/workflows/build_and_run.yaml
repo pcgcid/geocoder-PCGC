@@ -15,6 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Increase Swap Space
+        run: sudo fallocate -l 4G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
+
+      - name: Check system memory
+        run: free -m
 
       - name: Set up Docker
         uses: docker/setup-docker-action@v4
