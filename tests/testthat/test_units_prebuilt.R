@@ -14,7 +14,7 @@ test_that("Docker image works as expected", {
   
   input_file <- '/app/tests/testthat/address-sample-date-UTAH.csv'
   fields <- "id, address_date, matched_state, precision, geocode_result, fraction_assisted_income, fraction_high_school_edu, median_income, fraction_no_health_ins, fraction_poverty, fraction_vacant_housing, dep_index, drivetime_selected_center, nearest_center_pcgc, drivetime_pcgc, version"
-  
+  field_list = trimws(unlist(strsplit(fields,",")))
   if (!file.exists(input_file)) {
     stop("Cannot find input file. Please check if the input file exists.")
   }
@@ -28,7 +28,7 @@ test_that("Docker image works as expected", {
   args_list <- list(site = site, filename = input_file, score_threshold = 0.5, include_deid_fields = fields)
   output <- rdcrn_run(args_list)
   expect_equal(output[1, 'drivetime_selected_center'], 120)
-  expect_in(fields, colnames(output))
+  expect_in(field_list, colnames(output))
   
   # Test case 2
   expect_in(output[2, 'drivetime_selected_center'], c(120, 135))

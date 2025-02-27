@@ -27,7 +27,9 @@ jobs:
            password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build the docker image with latest tag
-        run: docker build -t ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:alpha .
+        run:  docker build --build-arg GIT_COMMIT=$(git rev-parse --short HEAD) \
+              --build-arg GIT_DATE="$(git log -1 --format=%cd --date=iso-strict)" \
+              -t ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:alpha .
         env:
           DOCKER_USERNAME: ${{ github.repository }}
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
