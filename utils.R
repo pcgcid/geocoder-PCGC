@@ -475,7 +475,7 @@ rdcrn_run <- function(opt){
     }
   }
     
-    if (!'df_dep' %in% ls()) {
+    if ('df_dep' %in% ls()) {
       cat("\n","Deprivation index has already been computed in input data. Skip deprivation index computation","\n")
       drivetime_input <- opt$filename
       output_dep = geocoded_df %>%
