@@ -28,6 +28,7 @@ test_that("Docker image works as expected", {
   args_list <- list(site = site, filename = input_file, score_threshold = 0.5, include_deid_fields = fields)
   output <- rdcrn_run(args_list)
   expect_equal(output[1, 'drivetime_selected_center'], 120)
+  expect_in(fields, colnames(output))
   
   # Test case 2
   expect_in(output[2, 'drivetime_selected_center'], c(120, 135))
