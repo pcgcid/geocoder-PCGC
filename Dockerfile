@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.4.1 
+FROM rocker/r-ver:4.4.1
 
 ARG GIT_COMMIT
 ARG GIT_DATE
@@ -101,12 +101,16 @@ COPY ./. /app
 
 
 # Copy test script
+# Copy test script
 COPY ./tests/testthat/test_units_prebuilt.R /app/test_units_prebuilt.R
-WORKDIR /tmp
+COPY ./tests/testthat/test_units_prebuilt_2.R /app/test_units_prebuilt_2.R
+COPY ./tests/testthat/test_units_prebuilt_3.R /app/test_units_prebuilt_3.R
 
-# Run the test script (If this fails, the build will fail)
-RUN Rscript /app/tests/testthat/test_units_prebuilt.R
+WORKDIR /tmp  
+# Run tests in a separate build step
+RUN Rscript /app/test_units_prebuilt.R
+RUN Rscript /app/test_units_prebuilt_2.R
+RUN Rscript /app/test_units_prebuilt_3.R
 
-WORKDIR /tmp
+# Set entrypoint
 ENTRYPOINT ["/app/entrypoint.R"]
-
