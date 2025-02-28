@@ -442,6 +442,19 @@ rdcrn_run <- function(opt){
     opt$filename = temp_file
   }
   
+  if (!"id" %in% tolower(colnames(d))){
+    cat("`id` is not in data.\n`id` is recommended to match with original data.
+        \nCreating `id` column based on the order of original data row number...",'\n')
+    d = d %>% mutate(id = dplyr::row_number()) %>%
+      relocate(id)
+    
+    # Generate a temporary file path
+    temp_file <- tempfile(fileext = ".csv")
+    
+    write.csv(d,temp_file , row.names = F, na = "")
+    opt$filename = temp_file
+  }
+  
   
   cat("Geocoding data...","\n")
   #if there are geocoded data with non-missing addresses in data with `lat` and `lon` columns, we still do the geocoding
