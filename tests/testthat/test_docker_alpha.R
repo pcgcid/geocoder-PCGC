@@ -197,28 +197,6 @@ test_that("Docker image works as expected for cases with errors", {
 })
 
 
-test_that("Docker image works as expected for cases with errors", {
-  current_dir <- getwd()
-  # case 1 - expected error  
-  docker_command <- paste0(
-    "docker run -v '", current_dir, "':/tmp ghcr.io/pcgcid/geocoder_pcgc:alpha",
-    " -s PCGC_UTAH -i /tmp/address-sample_no_quote.csv --force"
-  )
-  
-  # Run the Docker container
-  expect_warning(system(docker_command, intern = T))
-  
-  # case 2 - expected error  
-  docker_command_2 <- paste0(
-    "docker run -v '", current_dir, "':/tmp ghcr.io/pcgcid/geocoder_pcgc:alpha",
-    " -s PCGC_UTAH -i /tmp/input_no_address.csv --force"
-  )
-  
-  # Run the Docker container
-  expect_warning(system(docker_command_2, intern = T))
-})
-
-
 test_that("Docker image works as expected for cases with each consortium", {
   current_dir <- getwd()
   # case 1 - PCGC_YALE

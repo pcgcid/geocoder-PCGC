@@ -1,5 +1,11 @@
 FROM rocker/r-ver:4.4.1
 
+ARG GIT_COMMIT
+ARG GIT_DATE
+
+ENV GIT_COMMIT=$GIT_COMMIT
+ENV GIT_DATE=$GIT_DATE
+
 # DeGAUSS container metadata
 ENV degauss_name="geocoder"
 ENV degauss_version="3.3.0"
@@ -84,8 +90,6 @@ RUN R --quiet -e "renv::restore()"
 
 RUN R -e "renv::install('Rcpp')"
 RUN R -e "renv::install('GIScience/openrouteservice-r')"
-
-
 COPY geocode.rb .
 COPY entrypoint.R .
 COPY utils.R .
@@ -93,14 +97,16 @@ COPY utils.R .
 
 COPY ./pcgc_isochrones.csv /app
 COPY ./isochrones_pcgc_no_overlap.rds /app
-COPY ./. /app
+
+# Copy test script and data
+COPY ./tests /app/tests
 
 
+WORKDIR /tmp  
+# Run tests in a separate build step
+RUN Rscript /app/tests/testthat/test_units_prebuilt.R
+RUN Rscript /app/tests/testthat/test_units_prebuilt_2.R
+RUN Rscript /app/tests/testthat/test_units_prebuilt_3.R
 
-
-WORKDIR /tmp
-
-
-
+# Set entrypoint
 ENTRYPOINT ["/app/entrypoint.R"]
-
