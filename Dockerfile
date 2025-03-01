@@ -97,20 +97,16 @@ COPY utils.R .
 
 COPY ./pcgc_isochrones.csv /app
 COPY ./isochrones_pcgc_no_overlap.rds /app
-COPY ./. /app
 
+# Copy test script and data
+COPY ./tests /app/tests
 
-# Copy test script
-# Copy test script
-COPY ./tests/testthat/test_units_prebuilt.R /app/test_units_prebuilt.R
-COPY ./tests/testthat/test_units_prebuilt_2.R /app/test_units_prebuilt_2.R
-COPY ./tests/testthat/test_units_prebuilt_3.R /app/test_units_prebuilt_3.R
 
 WORKDIR /tmp  
 # Run tests in a separate build step
-RUN Rscript /app/test_units_prebuilt.R
-RUN Rscript /app/test_units_prebuilt_2.R
-RUN Rscript /app/test_units_prebuilt_3.R
+RUN Rscript /app/tests/testthat/test_units_prebuilt.R
+RUN Rscript /app/tests/testthat/test_units_prebuilt_2.R
+RUN Rscript /app/tests/testthat/test_units_prebuilt_3.R
 
 # Set entrypoint
 ENTRYPOINT ["/app/entrypoint.R"]
