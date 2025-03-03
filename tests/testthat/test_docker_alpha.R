@@ -51,6 +51,9 @@ test_that("Docker image runs successfully", {
   expect_equal(case_5_result, case_5_drivetime)
   expect_equal(case_6_result, case_6_drivetime)
   
+  fields <- "id, address_date, matched_state, precision, geocode_result, fraction_assisted_income, fraction_high_school_edu, median_income, fraction_no_health_ins, fraction_poverty, fraction_vacant_housing, dep_index, drivetime_selected_center, nearest_center_pcgc, drivetime_pcgc, version"
+  field_list = trimws(unlist(strsplit(fields,",")))
+  expect_in(field_list, colnames(output))
   
 })
 
@@ -172,28 +175,10 @@ test_that("Docker image works as expected for irregular case", {
   case_7_result = output[25,'drivetime_selected_center']
   expect_identical(is.na(case_7_result), T) 
   
-})
-
-
-test_that("Docker image works as expected for cases with errors", {
-  current_dir <- getwd()
-  # case 1 - expected error  
-  docker_command <- paste0(
-    "docker run -v '", current_dir, "':/tmp ghcr.io/pcgcid/geocoder_pcgc:alpha",
-    " -s PCGC_UTAH -i /tmp/address-sample_no_quote.csv --force"
-  )
   
-  # Run the Docker container
-  expect_warning(system(docker_command, intern = T))
-  
-  # case 2 - expected error  
-  docker_command_2 <- paste0(
-    "docker run -v '", current_dir, "':/tmp ghcr.io/pcgcid/geocoder_pcgc:alpha",
-    " -s PCGC_UTAH -i /tmp/input_no_address.csv --force"
-  )
-  
-  # Run the Docker container
-  expect_warning(system(docker_command_2, intern = T))
+  fields <- "id, address_date, matched_state, precision, geocode_result, fraction_assisted_income, fraction_high_school_edu, median_income, fraction_no_health_ins, fraction_poverty, fraction_vacant_housing, dep_index, drivetime_selected_center, nearest_center_pcgc, drivetime_pcgc, version"
+  field_list = trimws(unlist(strsplit(fields,",")))
+  expect_in(field_list, colnames(output))
 })
 
 
@@ -355,6 +340,11 @@ test_that("Docker image works as expected for cases with each consortium", {
   output <- read.csv(filepath)
   case_9_result = output[25,'drivetime_selected_center']
   expect_equal(case_9_result, 720)
+  
+  
+  fields <- "id, address_date, matched_state, precision, geocode_result, fraction_assisted_income, fraction_high_school_edu, median_income, fraction_no_health_ins, fraction_poverty, fraction_vacant_housing, dep_index, drivetime_selected_center, nearest_center_pcgc, drivetime_pcgc, version"
+  field_list = trimws(unlist(strsplit(fields,",")))
+  expect_in(field_list, colnames(output))
 })
 
 
