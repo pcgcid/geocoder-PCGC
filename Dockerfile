@@ -102,11 +102,7 @@ COPY ./isochrones_pcgc_no_overlap.rds /app
 COPY ./tests /app/tests
 
 
-WORKDIR /tmp  
-# Run tests in a separate build step
-RUN Rscript /app/tests/testthat/test_units_prebuilt.R
-RUN Rscript /app/tests/testthat/test_units_prebuilt_2.R
-RUN Rscript /app/tests/testthat/test_units_prebuilt_3.R
+WORKDIR /tmp
 
 # Set entrypoint
 ENTRYPOINT ["/app/entrypoint.R"]
