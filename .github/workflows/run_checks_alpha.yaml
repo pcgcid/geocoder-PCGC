@@ -33,6 +33,9 @@ jobs:
         run: |
           set -x
           docker version
+          docker pull ghcr.io/linuxkit/linuxkit
+          docker run --rm -v /Users/runner/.lima:/root/.lima linuxkit profile lima create -m 2048 -d
+          docker run --rm -v /Users/runner/.lima:/root/.lima linuxkit profile lima start
 
       - name: Check Docker version if OS is Windows
         if: runner.os == 'Windows'
@@ -41,6 +44,7 @@ jobs:
               docker run hello-world
               docker pull ghcr.io/pcgcid/geocoder_pcgc:alpha
               where.exe docker
+              
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
       - name: Install tidyverse
