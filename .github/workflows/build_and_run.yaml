@@ -13,28 +13,35 @@ env:
 jobs:
   build-docker-container:
     runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      USERNAME: ${{ github.repository_owner }}
+      REPOSITORY: ${{ github.repository }}
+      
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Docker
         uses: docker/setup-docker-action@v4
 
-      - name: Log in to the Container registry
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-           registry: ${{ env.REGISTRY }}
-           username: ${{ github.actor }}
-           password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build the docker image with latest tag
-        run: docker build -t ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:alpha .
-        env:
-          DOCKER_USERNAME: ${{ github.repository }}
-          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create alpha tag variable
+        run: echo "CONTAINER=${{ env.REGISTRY }}/${{ env.USERNAME }}/geocoder_pcgc:alpha" >> $GITHUB_ENV
 
-      - name: branch Push Docker image to github package registry with latest tag
-        run: docker push ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:alpha
-        env:
-          DOCKER_USERNAME: ${{ github.repository }}
-          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release tag variable
+        run: |
+          version_tag=${GITHUB_REF#refs/tags/}
+          echo "VERSIONED=${{ env.REGISTRY }}/${{ env.USERNAME }}/geocoder_pcgc:${version_tag}" >> $GITHUB_ENV
+      - name: Build container
+        run: docker build -t ${{ env.CONTAINER }} .
 
+      - name: Tag and push release (and alpha) container
+        run: |
+            docker tag ${{ env.CONTAINER }} ${{ env.VERSIONED }}
+            docker push ${{ env.VERSIONED }}
