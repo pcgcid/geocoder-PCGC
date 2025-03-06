@@ -46,12 +46,5 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
 
-      - name: Create release tag variable
-        run: |
-          version_tag=${GITHUB_REF#refs/tags/}
-          echo "VERSIONED=${{ env.REGISTRY }}/${{ env.USERNAME }}/geocoder_pcgc:${version_tag}" >> $GITHUB_ENV
-      - name: Build container
-        run: docker build -t ${{ env.CONTAINER }} .
-
       - name: Tag and push release (and alpha) container
         run: docker push ${{ env.CONTAINER }}
