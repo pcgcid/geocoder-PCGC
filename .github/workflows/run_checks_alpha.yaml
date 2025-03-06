@@ -14,6 +14,7 @@ jobs:
         fail-fast: false
         matrix:
             config:
+
                 #- {os: macos-latest,   r: 'release'}
                 - {os: ubuntu-latest, r: 'devel'}
                 #- {os: windows-latest, r: 'release'}
@@ -29,11 +30,6 @@ jobs:
       - name: Setup Docker
         uses: docker/setup-docker-action@v4
 
-      - name: Check Docker version if OS is Windows
-        run: |
-              docker version 
-              docker run hello-world
-              docker pull ghcr.io/pcgcid/geocoder_pcgc:alpha
       - name: Install rmarkdown
         run: Rscript -e 'install.packages("rmarkdown")'
       - name: Install tidyverse

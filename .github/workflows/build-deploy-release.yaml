@@ -33,7 +33,10 @@ jobs:
           echo "VERSIONED=${{ env.REGISTRY }}/${{ env.USERNAME }}/geocoder_pcgc:${version_tag}" >> $GITHUB_ENV
 
       - name: Build container
-        run: docker build -t ${{ env.CONTAINER }} .
+        run: |
+              docker build --build-arg GIT_COMMIT=$(git rev-parse --short HEAD) \
+              --build-arg GIT_DATE="$(git log -1 --format=%cd --date=iso-strict)" \
+              -t ${{ env.CONTAINER }} .
 
       - name: Tag and push release (and latest) container
         run: |
