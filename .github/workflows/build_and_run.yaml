@@ -46,5 +46,5 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
 
-      - name: Tag and push release (and alpha) container
-        run: docker push ${{ env.CONTAINER }}
+      - name: Push release (and alpha) container
+        run: docker push ghcr.io/${{ github.repository_owner }}/geocoder_pcgc:alpha
