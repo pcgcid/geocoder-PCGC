@@ -1,6 +1,7 @@
 
 name: Run checks after release
 on: 
+  workflow_dispatch:
   workflow_run:
     workflows: [build-deploy-release]
     types:
