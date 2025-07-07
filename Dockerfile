@@ -2,9 +2,11 @@ FROM rocker/r-ver:4.4.1
 
 ARG GIT_COMMIT
 ARG GIT_DATE
+ARG IMAGE_TAG
 
 ENV GIT_COMMIT=$GIT_COMMIT
 ENV GIT_DATE=$GIT_DATE
+ENV IMAGE_TAG=$IMAGE_TAG
 
 # DeGAUSS container metadata
 ENV degauss_name="geocoder"
@@ -18,13 +20,7 @@ LABEL "org.degauss.version"="${degauss_version}"
 LABEL "org.degauss.description"="${degauss_description}"
 LABEL "org.degauss.argument"="${degauss_argument}"
 
-# Create the directory if it doesn't exist
-#RUN mkdir -p /opt/
 
-ADD https://geomarker.s3.amazonaws.com/geocoder_2021.db /opt/geocoder.db
-# COPY geocoder.db /opt/geocoder.db
-ADD https://geomarker.s3.us-east-2.amazonaws.com/geometries/tracts_2010_sf_5072.rds /opt/tracts_2010_sf_5072.rds
-ADD https://geomarker.s3.us-east-2.amazonaws.com/tract_dep_index_2018.rds /opt/tract_dep_index_18.rds
 
 
 
@@ -64,6 +60,15 @@ RUN apt-get update && apt-get install -y \
 RUN gem install sqlite3 -v 1.6.0
 
 RUN gem install json Text
+
+
+# Create the directory if it doesn't exist
+RUN mkdir -p /opt/
+
+ADD https://geomarker.s3.amazonaws.com/geocoder_2021.db /opt/geocoder.db
+#COPY geocoder.db /opt/geocoder.db
+ADD https://github.com/degauss-org/dep_index/releases/download/0.2.1/tracts_2010_sf_5072.rds /opt/tracts_2010_sf_5072.rds
+COPY tract_dep_index_2018.rds /opt/tract_dep_index_18.rds
 
 RUN mkdir /app
 WORKDIR /app

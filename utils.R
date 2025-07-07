@@ -518,7 +518,7 @@ rdcrn_run <- function(opt){
   
   
   output = rdcrn_drivetime(out_filename, out_filename,"pcgc")$output %>%
-    dplyr::mutate(version = "geoocoder_PCGC_0.0.4")
+    dplyr::mutate(version = paste0("geocoder_PCGC_",Sys.getenv("IMAGE_TAG")))
 
   include_deid_fields = opt$include_deid_fields
   if(is.null(include_deid_fields)){

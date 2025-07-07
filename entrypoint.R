@@ -35,7 +35,7 @@ doc <- "
       "
 opt <- docopt::docopt(doc)
 
-cat("\nRunning version with Commit:", Sys.getenv("GIT_COMMIT"), "of Date:", Sys.getenv("GIT_DATE"), "\n")
+cat("\nRunning version ",Sys.getenv("IMAGE_TAG")," with Commit:", Sys.getenv("GIT_COMMIT"), "of Date:", Sys.getenv("GIT_DATE"), "\n")
 
 # Access the parsed arguments
 input_file <- opt[["--input-file"]]
@@ -56,7 +56,7 @@ if (opt[['--site-list']]) {
 
 # Handle version option
 if (opt$version | opt$ver) {
-  cat("Version: geoocoder_PCGC_0.0.2\n")
+  cat("Version: geocoder_PCGC_",Sys.getenv("IMAGE_TAG"),"\n")
   q(status = 0)
 }
 
